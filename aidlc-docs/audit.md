@@ -1238,3 +1238,11 @@ Slackには単なる通知ではなく、AIが関係者にメンションして�
 **Context**: INCEPTION - Requirements Analysis approval gate
 
 ---
+
+## Requirements Document Translation
+**Timestamp**: 2026-05-05T11:05:46+09:00
+**User Input**: "[requirements.md](aidlc-docs/inception/requirements/requirements.md) を日本語で正本してPushしてください。"
+**AI Response**: "Rewrote `aidlc-docs/inception/requirements/requirements.md` as the Japanese source-of-truth version while preserving the approved requirements scope and structure, then prepared the change for push."
+**Context**: Documentation update on `docs/requirement`
+
+---

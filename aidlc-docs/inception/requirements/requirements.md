@@ -1,132 +1,138 @@
-# Requirements Document
+# 要件定義書
 
-## Intent Analysis Summary
-- **User Request**: Build an AWS hackathon MVP web app named `AIが決めたんで。` that runs a chat-driven paid leave coordination workflow and posts a stakeholder-thread to Slack after AI-supported analysis and user review.
-- **Request Type**: New Project
-- **Scope Estimate**: System-wide greenfield application spanning frontend, backend workflow orchestration, AI integration, persistence, and external adapters
-- **Complexity Estimate**: Complex
-- **Requirements Depth**: Comprehensive
+## 意図分析サマリー
+- **ユーザー要求**: `AIが決めたんで。` という名称の AWS ハッカソン向け MVP Web アプリを構築する。チャット起点で有休調整ワークフローを実行し、AI による分析とユーザーレビューの後、Slack に関係者向け調整スレッドを投稿できること。
+- **要求種別**: 新規プロジェクト
+- **想定スコープ**: フロントエンド、バックエンドのワークフロー制御、AI 連携、永続化、外部連携アダプタを含むグリーンフィールドのシステム全体
+- **複雑度見積もり**: 高
+- **要件分析の深さ**: 包括的
 
-## Product Vision
-`AIが決めたんで。` is an AI agent web application that helps users delegate difficult leave-coordination conversations to AI. The MVP focuses only on paid leave coordination and uses chat as the main interaction model. The system must collect missing information through conversation, evaluate calendar and team impact, generate negotiation guidance, and prepare a Slack coordination thread that the user reviews before posting.
+## プロダクトビジョン
+`AIが決めたんで。` は、人が言いにくい有休調整を AI が代行する AI エージェント型 Web アプリである。MVP では有休調整に対象を限定し、チャットを主たる操作導線とする。会話の中で不足情報を補完し、カレンダーやチーム予定を踏まえて業務影響を分析し、調整方針を生成し、Slack 投稿文の作成と送信までを支援する。
 
-## Business Goals
-- Deliver a hackathon demo that reliably shows an end-to-end leave-coordination workflow.
-- Demonstrate that the product is an AI-agent application, not just a Slack bot.
-- Show credible AWS-native architecture using Amplify, API Gateway, backend runtime, Step Functions, DynamoDB, Bedrock, Secrets Manager, and CloudWatch.
-- Preserve future extensibility toward other "AI says the hard thing for you" workflows.
+## ビジネスゴール
+- ハッカソンデモで、有休調整フローが端から端まで安定して成立することを示す。
+- 単なる Slack Bot ではなく、チャット起点で動く AI エージェント型アプリであることを示す。
+- Amplify、API Gateway、Bedrock AgentCore Runtime、Step Functions、DynamoDB、Secrets Manager、CloudWatch を中心とした AWS ネイティブ構成の説得力を示す。
+- 将来的に「人が言いにくいこと全般を AI が代行する」プロダクトへ拡張できる土台を残す。
 
-## Success Criteria
-- The user can enter a natural-language request such as `来週金曜休みたい`.
-- The AI can ask follow-up questions when mode, date, reason, or destination details are missing.
-- The system can suggest easier-to-take leave dates when the request is underspecified.
-- The UI shows vacation score, business impact, affected meetings, substitute candidates, reasoning, and current status.
-- The system can generate a Slack message for review and post a stakeholder-mention thread to an actual Slack workspace in the demo.
-- The request status updates to the negotiation state after posting.
-- Workflow progress is observable through Step Functions and/or CloudWatch.
+## 成功条件
+- ユーザーが `来週金曜休みたい` のような自然文を入力できる。
+- モード、日付、理由、投稿先などが不足している場合に AI が聞き返せる。
+- 日付未指定または柔軟な依頼に対し、休みやすい候補日を提案できる。
+- UI 上に休暇実現可能性スコア、業務影響、影響会議、代替担当候補、判断理由、現在ステータスが表示される。
+- Slack 投稿文をレビューでき、実際の Slack ワークスペースに関係者メンション付きスレッドを投稿できる。
+- 投稿後にステータスが調整中相当へ更新される。
+- Step Functions または CloudWatch でワークフロー進行状況を確認できる。
 
-## User Decisions Captured
-- **Calendar integration for MVP**: Google Calendar only
-- **Backend runtime direction**: Bedrock AgentCore Runtime centered architecture
-- **Slack posting mode**: Real Slack posting required in demo
-- **Authentication**: No authentication required for MVP demo
-- **Multi-agent scope**: Include a minimal working orchestrator and lawyer sub-agent path
-- **Demo priority**: Show real Slack posting and AI-driven negotiation behavior
-- **Security extension**: Disabled for this project
-- **Property-based testing extension**: Enabled as blocking for applicable later stages
+## 確定した意思決定
+- **MVP のカレンダー連携**: Google Calendar のみ
+- **バックエンド実行方針**: Bedrock AgentCore Runtime 中心の構成
+- **Slack 投稿方針**: デモでは実 Slack 投稿を行う
+- **認証方針**: MVP では認証なし
+- **マルチエージェント範囲**: オーケストレータと弁護士サブエージェントの最小動作を含める
+- **デモ優先事項**: 実 Slack 投稿と AI エージェントのネゴシエーション体験を見せる
+- **Security Baseline 拡張**: 無効
+- **Property-Based Testing 拡張**: 後続の該当ステージで必須
 
-## In Scope
-- Chat-first UI for leave coordination
-- Natural-language input parsing for desired date, leave mode, reason, urgency, stakeholders, and Slack destination
-- AI follow-up questioning for missing information
-- Leave mode support:
+## 対象範囲
+- 有休調整を主目的としたチャットファースト UI
+- 自然文からの情報抽出
+  - 希望休暇日
+  - 休暇モード
+  - 休暇理由表現
+  - 緊急度
+  - Slack 投稿先
+  - 関係者
+- 不足情報に対する AI の追加質問
+- 以下 3 モードのサポート
   - `絶対休めるモード`
   - `できれば休みたいモード`
-  - `バレずに休みたいモード` with explicit prohibition on deception or false reasons
-- AI suggestion of easy-to-take leave dates when date is missing or flexible
-- Vacation feasibility scoring from `0` to `100`
-- Business impact assessment using `Low`, `Medium`, `High`
-- Analysis result display including reasoning, affected meetings, and substitute candidates
-- Slack message generation, review, edit, and posting
-- Slack stakeholder mention thread creation
-- Status lifecycle management
-- Multi-agent orchestration with at least one escalation path to a lawyer-style sub-agent
-- External integration adapters separated for future MCP replacement
-- Demo fallback behavior for Bedrock, Slack, and Google Calendar failures
+  - `バレずに休みたいモード`
+- 日付未指定または柔軟指定時の休みやすい候補日提案
+- `0` から `100` の休暇実現可能性スコアリング
+- `Low` / `Medium` / `High` による業務影響度判定
+- 判断理由、影響会議、代替担当候補を含む分析結果表示
+- Slack 投稿文の生成、レビュー、編集、投稿
+- 関係者メンション付き Slack 調整スレッド作成
+- ステータス管理
+- 弁護士サブエージェントへのエスカレーションを含むマルチエージェント構成
+- Slack / Calendar の Adapter 分離
+- Bedrock、Slack、Google Calendar 障害時のデモ用フォールバック
 
-## Out of Scope
-- Attendance or HR leave system integration
-- Formal paid leave application workflow
-- Full Slack reply automation
-- Production-grade authentication and authorization
-- Full MCP server implementation
-- Future "decline drinking party" or other non-leave modes beyond extension-ready design
+## 非対象
+- 勤怠システム連携
+- 正式な有休申請ワークフロー連携
+- Slack 返信の完全自動解析
+- 本格的な認証認可
+- MCP サーバの本実装
+- 有休以外の将来モードの詳細設計
 
-## Primary Personas
-- **Requester**: Employee who wants AI to handle uncomfortable leave coordination through chat.
-- **Stakeholder / Approver**: Team members or leads mentioned in Slack who need clear context and substitute proposals.
-- **Demo Operator**: Presenter who needs stable fallback paths, seeded demo data, and observable workflow execution.
+## 主要ペルソナ
+- **依頼者**: 有休調整の言いにくさを AI に委ねたい従業員
+- **関係者 / 承認側**: Slack 上でメンションされ、代替案や依頼内容を確認するチームメンバーやリード
+- **デモ実施者**: フォールバック、デモデータ、可観測性を使って確実に流れを見せたい発表者
 
-## Functional Requirements
+## 機能要件
 
-### FR-01 Chat Experience
-- The application shall provide a chat interface as the primary workflow entry point.
-- The application shall persist chat sessions and messages for each leave coordination flow.
-- The chat shall support natural-language requests in Japanese.
-- The AI shall respond conversationally and collect missing information before analysis.
+### FR-01 チャット体験
+- アプリケーションは、有休調整ワークフローの主入口としてチャット UI を提供すること。
+- 各調整フローに対してチャットセッションとメッセージを保持すること。
+- チャットは日本語の自然文入力に対応すること。
+- AI は会話形式で応答し、分析前に不足情報を収集すること。
 
-### FR-02 Intent Extraction
-- The system shall extract or infer:
-  - desired leave date or date range
-  - leave mode
-  - leave reason phrasing
-  - urgency
-  - Slack posting destination if provided
-  - relevant stakeholders if provided or inferable
-- If the user provides only a date or an incomplete request, the AI shall ask follow-up questions.
-- If the user asks for an unspecified day in a broader time window, the AI shall propose candidate dates based on schedule analysis.
+### FR-02 意図抽出
+- システムは以下を抽出または推定すること。
+  - 希望休暇日または期間
+  - 休暇モード
+  - 休暇理由の表現
+  - 緊急度
+  - 指定があれば Slack 投稿先
+  - 指定または推定可能な関係者
+- 日付のみ、または不完全な依頼が入力された場合、AI は追加質問を行うこと。
+- 月内のどこか、のような広い条件の場合、AI は予定分析に基づき候補日を提示すること。
 
-### FR-03 Leave Modes
-- The system shall support the three MVP leave modes with mode-specific behavior.
-- In `絶対休めるモード`, the system shall optimize for achieving leave and generate concrete delegation proposals.
-- In `できれば休みたいモード`, the system shall frame coordination as consultation and offer alternatives when impact is high.
-- In `バレずに休みたいモード`, the system shall optimize for low-impact natural leave timing without generating deceptive or false justifications.
-- The system shall allow the user to explicitly set a mode even if the AI inferred one.
+### FR-03 休暇モード
+- システムは 3 つの休暇モードをサポートし、モード別に振る舞いを変えること。
+- `絶対休めるモード` では、休暇実現を最優先し、具体的な代替案や依頼文を生成すること。
+- `できれば休みたいモード` では、相談ベースの表現を採用し、業務影響が高い場合は代替日も提案すること。
+- `バレずに休みたいモード` では、虚偽や隠蔽を支援せず、業務影響が小さく自然に休める日を優先提案すること。
+- AI が推定した場合でも、ユーザーがモードを明示指定できること。
 
-### FR-04 Schedule Analysis
-- The system shall retrieve Google Calendar data for the target user in the MVP.
-- The system shall retrieve team schedule information from demo data and/or application-managed records.
-- The system shall identify affected meetings, participation importance, rescheduling flexibility, and substitute candidates.
-- The system shall fall back to demo schedule data when Google Calendar access fails.
+### FR-04 予定分析
+- MVP では対象ユーザーの Google Calendar データを取得すること。
+- チーム予定についてはデモデータまたはアプリ管理データを取得すること。
+- 影響を受ける会議、参加重要度、リスケ可否、代替担当候補を特定すること。
+- Google Calendar 取得に失敗した場合はデモ予定データへフォールバックすること。
 
-### FR-05 Scoring and Business Impact
-- The system shall calculate a vacation feasibility score between `0` and `100`.
-- The score shall consider meeting count, meeting importance, ownership, substitute availability, reschedulability, team availability, leave mode, and urgency.
-- The system shall classify business impact as `Low`, `Medium`, or `High`.
-- The system shall display a human-readable explanation of the score and impact assessment.
+### FR-05 スコアリングと業務影響判定
+- システムは `0` から `100` の休暇実現可能性スコアを算出すること。
+- スコア計算では、会議数、重要会議の有無、本人主担当かどうか、代替担当候補の有無、リスケ可否、チーム空き状況、休暇モード、緊急度を考慮すること。
+- 業務影響度を `Low`、`Medium`、`High` の 3 段階で分類すること。
+- スコアと業務影響の理由を人間が読める形で表示すること。
 
-### FR-06 Negotiation Planning
-- The system shall generate a negotiation strategy tailored to the selected leave mode and analysis outcome.
-- The system shall produce substitute candidate suggestions and concrete asks for affected stakeholders.
-- For low-feasibility scenarios in `絶対休めるモード`, the system shall be able to escalate to a lawyer-style sub-agent through the orchestrator.
+### FR-06 ネゴシエーション方針生成
+- システムは分析結果と休暇モードに応じた調整戦略を生成すること。
+- 代替担当候補と関係者への具体的な依頼内容を提案すること。
+- `絶対休めるモード` で実現可能性が低い場合、オーケストレータ経由で弁護士サブエージェントへエスカレーションできること。
 
-### FR-07 Slack Review and Posting
-- The system shall generate a Slack post draft containing:
-  - desired leave date
-  - leave mode
-  - feasibility score
-  - business impact
-  - AI reasoning summary
-  - substitute candidates
-  - stakeholder asks
-  - the phrase `AIが決めたんで。`
-- The user shall be able to review and edit the Slack message before sending.
-- The system shall post to a real Slack workspace for the hackathon demo.
-- The system shall create or simulate a stakeholder mention thread tied to the leave request.
-- The system shall show an error in the UI if Slack posting fails.
+### FR-07 Slack レビューと投稿
+- システムは以下を含む Slack 投稿文ドラフトを生成すること。
+  - 希望休暇日
+  - 休暇モード
+  - 休暇実現可能性スコア
+  - 業務影響度
+  - AI 判断理由の要約
+  - 代替担当候補
+  - 関係者への依頼
+  - `AIが決めたんで。` の一言
+- ユーザーは送信前に Slack 投稿文をレビューおよび編集できること。
+- ハッカソンデモでは実際の Slack ワークスペースへ投稿できること。
+- 対象リクエストに紐づく関係者メンション付きスレッドを作成または模擬表現できること。
+- Slack 投稿失敗時には UI 上でエラーを表示すること。
 
-### FR-08 Workflow and Status Management
-- The system shall track request statuses using:
+### FR-08 ワークフローとステータス管理
+- システムは以下のステータスを扱うこと。
   - `DRAFT`
   - `COLLECTING_INFO`
   - `ANALYZING`
@@ -135,11 +141,11 @@
   - `APPROVED`
   - `NEEDS_REPLAN`
   - `FAILED`
-- The system shall move requests through the workflow based on user input and orchestration results.
-- The system shall expose request detail views including status history, analysis, and Slack posting history.
+- ユーザー入力とオーケストレーション結果に応じてステータスを遷移させること。
+- リクエスト詳細画面で、ステータス履歴、分析結果、Slack 投稿履歴を確認できること。
 
-### FR-09 Orchestration Workflow
-- The system shall orchestrate the following logical steps using AWS Step Functions:
+### FR-09 オーケストレーション
+- システムは AWS Step Functions により以下の論理ステップを管理すること。
   - `ReceiveChatMessage`
   - `ExtractVacationIntent`
   - `CheckMissingInformation`
@@ -152,111 +158,111 @@
   - `PostToSlack`
   - `UpdateStatus`
   - `ErrorHandler`
-- The workflow shall support human-in-the-loop pauses for review before Slack posting.
+- Slack 投稿前に人手レビュー待ちで停止できること。
 
-### FR-10 Adapter Separation
-- Slack and calendar integrations shall be implemented behind adapter interfaces so they can later be replaced with MCP-backed implementations.
-- The system shall support demo-mode adapters and real adapters without changing core orchestration logic.
+### FR-10 Adapter 分離
+- Slack と Calendar の連携は、将来 MCP 実装へ置換できるよう Adapter インターフェースの背後に実装すること。
+- コアのオーケストレーションロジックを変えずに、デモ用アダプタと実アダプタを切り替えられること。
 
-## Data Requirements
-- The system shall manage at least the following entities:
+## データ要件
+- システムは少なくとも以下のエンティティを扱うこと。
   - `ChatSessions`
   - `ChatMessages`
   - `VacationRequests`
   - `TeamSchedules`
   - `Users`
-- The MVP data model shall include all fields listed in the original specification unless a later design stage refines names or storage layout.
-- The system shall persist workflow state and generated artifacts needed for request detail and demo traceability.
+- MVP のデータモデルは、元仕様で定義された主要フィールドを保持すること。名称や格納形式の微調整は後続設計で許容する。
+- リクエスト詳細表示とデモ追跡のため、ワークフロー状態と生成成果物を永続化すること。
 
-## UI Requirements
-- The system shall provide the following screens/panels:
+## UI 要件
+- システムは以下の画面またはパネルを提供すること。
   - `Chat`
   - `Analysis Result Panel`
   - `Slack Message Review`
   - `Request Detail`
-- The chat screen shall show conversation history, input, summary cards, candidate dates, Slack review entry, and current status.
-- The analysis panel shall show leave mode, business impact, affected meetings, substitute candidates, reasoning, and negotiation strategy.
-- The Slack review view shall show preview, mentions, channel, editable message body, send action, and cancel action.
-- The request detail view shall show request data, chat history, analysis, status, and Slack posting history.
+- Chat 画面では、会話履歴、入力欄、サマリーカード、候補日、Slack レビュー導線、現在ステータスを表示すること。
+- Analysis Result Panel では、休暇モード、業務影響度、影響会議、代替担当候補、判断理由、推奨ネゴ戦略を表示すること。
+- Slack Message Review では、プレビュー、メンション対象、投稿チャンネル、編集欄、送信ボタン、キャンセルボタンを表示すること。
+- Request Detail では、申請内容、チャット履歴、分析結果、ステータス、Slack 投稿履歴を表示すること。
 
-## Architecture Requirements
-- The frontend shall use React, TypeScript, Vite, and Tailwind CSS.
-- Hosting shall target AWS Amplify Hosting.
-- The API layer shall use Amazon API Gateway.
-- The backend shall be implemented in TypeScript and centered on Bedrock AgentCore Runtime for agent behavior.
-- Workflow orchestration shall use AWS Step Functions.
-- Persistence shall use DynamoDB.
-- AI generation shall use Amazon Bedrock.
-- Secrets shall be stored in AWS Secrets Manager.
-- Logs and execution traces shall be visible in CloudWatch.
-- Slack integration shall use Slack Incoming Webhook or Slack Web API, with the implementation chosen later for best thread and mention support.
-- Google Calendar API credentials shall be managed via AWS Secrets Manager.
+## アーキテクチャ要件
+- フロントエンドは React、TypeScript、Vite、Tailwind CSS を使用すること。
+- ホスティングは AWS Amplify Hosting を前提とすること。
+- API 層は Amazon API Gateway を利用すること。
+- バックエンドは TypeScript で実装し、エージェント挙動の中心に Bedrock AgentCore Runtime を置くこと。
+- ワークフロー制御には AWS Step Functions を利用すること。
+- 永続化には DynamoDB を利用すること。
+- AI 生成には Amazon Bedrock を利用すること。
+- シークレットは AWS Secrets Manager で管理すること。
+- ログおよび実行トレースは CloudWatch で確認できること。
+- Slack 連携は Slack Incoming Webhook または Slack Web API を使用し、スレッド作成やメンション要件に適した方式を後続で決定すること。
+- Google Calendar API の認証情報は AWS Secrets Manager で管理すること。
 
-## Multi-Agent Requirements
-- The application shall use an orchestrator plus sub-agent structure.
-- The orchestrator shall decide when to invoke specialized sub-agents.
-- The MVP shall include at least one working escalation path to a lawyer-style sub-agent for difficult `絶対休めるモード` negotiations.
-- Sub-agent behavior may be implemented with lightweight prompt/persona specialization as long as the orchestration boundary is explicit.
+## マルチエージェント要件
+- アプリケーションはオーケストレータと複数サブエージェントで構成されること。
+- オーケストレータは、どのサブエージェントを呼び出すかを判断すること。
+- MVP では少なくとも、難しい `絶対休めるモード` の調整で弁護士サブエージェントにエスカレーションする動作を含めること。
+- サブエージェントは、明確なオーケストレーション境界が保たれるなら、軽量なプロンプトやペルソナ切替で実現してよい。
 
-## Non-Functional Requirements
+## 非機能要件
 
-### NFR-01 Demo Reliability
-- The demo shall complete end-to-end using only demo data if external integrations fail.
-- Bedrock generation failures shall fall back to template-based message generation.
-- Google Calendar failures shall fall back to demo schedule data.
-- Slack failures shall surface clear UI errors and preserve generated content for retry.
+### NFR-01 デモ信頼性
+- 外部連携が失敗しても、デモデータのみで端から端まで完結できること。
+- Bedrock 生成失敗時はテンプレートベースの文面生成へフォールバックすること。
+- Google Calendar 失敗時はデモ予定データへフォールバックすること。
+- Slack 失敗時は UI で明確にエラー表示し、再試行できるよう生成結果を保持すること。
 
-### NFR-02 Observability
-- Workflow state transitions and failures shall be observable in Step Functions and/or CloudWatch.
-- The system shall log enough detail to explain score calculation inputs, workflow branch decisions, and posting outcomes during demo troubleshooting.
+### NFR-02 可観測性
+- ワークフローの状態遷移と失敗を Step Functions およびまたは CloudWatch で追跡できること。
+- デモ時のトラブルシュートのため、スコア計算入力、分岐判断、投稿結果を説明できるログを残すこと。
 
-### NFR-03 Extensibility
-- The architecture shall isolate domain workflow logic from external integration adapters.
-- The architecture shall allow future expansion into other "difficult communication delegation" workflows.
-- The leave mode mechanism shall be designed so future modes can be added without redesigning the chat foundation.
+### NFR-03 拡張性
+- ドメインのワークフローロジックと外部連携アダプタを分離すること。
+- 将来的に「言いにくいことの代行」ユースケースへ拡張できること。
+- 休暇モードの仕組みは、将来モード追加時にもチャット基盤を作り直さずに済むこと。
 
-### NFR-04 Usability
-- The user shall be able to drive the MVP with natural language and minimal form filling.
-- The UI shall prioritize a fast, understandable demo flow over enterprise completeness.
-- The generated Japanese messaging shall feel natural and non-confrontational.
+### NFR-04 使いやすさ
+- ユーザーは最小限の入力で自然文から操作できること。
+- UI は業務システムの完全性よりも、短時間で理解できるデモ体験を優先すること。
+- 生成される日本語文面は自然で角が立たないこと。
 
-### NFR-05 Safety and Compliance
-- The system shall not generate fraudulent or deceptive leave reasons.
-- The `バレずに休みたいモード` shall be implemented as "minimize operational impact and phrase naturally," not as concealment support.
-- The system shall keep user-edit review before any Slack posting.
+### NFR-05 安全性とポリシー
+- システムは虚偽または不正な休暇理由を生成しないこと。
+- `バレずに休みたいモード` は、隠蔽支援ではなく「業務影響を最小化して自然に休める日と表現を提案する」モードとして実装すること。
+- 外部向け Slack 投稿前に必ずユーザー編集レビューを挟むこと。
 
-### NFR-06 Testing Strategy
-- Property-based testing is a required constraint in later applicable stages.
-- The project shall select a TypeScript-compatible PBT framework and include it in the testing strategy.
-- Business-critical behavior shall still require example-based tests in addition to property-based tests.
+### NFR-06 テスト戦略
+- Property-Based Testing は、後続の該当ステージで必須制約として扱うこと。
+- TypeScript で利用可能な PBT フレームワークを選定し、テスト戦略に組み込むこと。
+- 業務上重要なふるまいについては、PBT だけでなく example-based test も用意すること。
 
-## Assumptions
-- A Slack workspace and posting credential will be available for the demo.
-- Google Calendar API access for at least one demo user will be obtainable, even if fallback data is also prepared.
-- Hackathon scope permits demo-focused auth omission.
-- Team schedule data can be seeded and maintained in the app or static fixtures for demo resilience.
+## 前提条件
+- デモで利用可能な Slack ワークスペースと投稿用認証情報が用意できること。
+- 少なくとも 1 人分の Google Calendar API アクセス情報を取得できること。あわせてデモデータも準備すること。
+- ハッカソン用途のため、認証省略が許容されること。
+- チーム予定データは、アプリ管理データまたは静的フィクスチャとして整備できること。
 
-## Constraints
-- The solution must remain AWS-native in its primary deployment architecture.
-- The MVP must focus only on paid leave coordination.
-- The solution must separate adapters for future MCP replacement.
-- The workflow must preserve human review before outbound Slack posting.
+## 制約条件
+- 主要なデプロイ構成は AWS ネイティブであること。
+- MVP の対象は有休調整に限定すること。
+- 将来の MCP 置換に備えて Adapter 分離を維持すること。
+- 外部向け Slack 投稿前の人手レビューを必須とすること。
 
-## Risks and Open Items
-- Actual Slack thread creation requirements may push the implementation toward Slack Web API rather than a simple webhook.
-- Bedrock AgentCore runtime integration details may affect local development ergonomics and deployment packaging.
-- Real Google Calendar integration may require consent and credential setup that must be validated early.
-- No authentication increases demo speed but reduces realism for user identity and personalization.
+## リスクと未解決事項
+- Slack のスレッド作成要件次第では、単純な Webhook ではなく Slack Web API を選ぶ必要がある。
+- Bedrock AgentCore Runtime の実装詳細が、ローカル開発やデプロイパッケージ構成に影響する可能性がある。
+- 実 Google Calendar 連携は、認可や資格情報設定の難易度があるため、早期に検証が必要である。
+- 認証なし構成はデモ速度に有利だが、ユーザー識別や権限制御の現実性は下がる。
 
-## Recommended Next Stage
-- **User Stories** should execute next because this is a user-facing, multi-persona, multi-step workflow with significant acceptance-criteria needs.
+## 推奨される次ステージ
+- 次は **User Stories** を実行すること。理由は、本件がユーザー向け、複数ペルソナ、複数ステップのワークフローであり、受け入れ条件を明確化する価値が高いため。
 
-## Extension Compliance Summary
+## 拡張ルール適用サマリー
 
 ### Security Baseline
-- **Status**: Disabled by user choice in Requirements Analysis
+- **状態**: Requirements Analysis にてユーザー判断で無効
 
 ### Property-Based Testing
-- **Status**: Enabled
-- **Requirements Analysis applicability**: N/A
-- **Rationale**: PBT rules begin applying in Functional Design, NFR Requirements, Code Generation, and Build and Test stages, not in Requirements Analysis artifacts.
+- **状態**: 有効
+- **Requirements Analysis での適用可否**: N/A
+- **理由**: PBT ルールは Functional Design、NFR Requirements、Code Generation、Build and Test で適用開始され、Requirements Analysis の成果物には直接適用されないため。
