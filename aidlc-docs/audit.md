@@ -1288,3 +1288,16 @@ FR-05のスコアリングと業務影響判定については、休むための
 **Context**: INCEPTION - Requirements refinement during User Stories planning
 
 ---
+
+## Requirements Escalation Logic Update Request
+**Timestamp**: 2026-05-06T22:40:47+09:00
+**User Input**: "[requirements.md](aidlc-docs/inception/requirements/requirements.md) 
+- FR-03
+    - 絶対休めるモード: 休暇取得成立が最優先なため、代替案の提示は不要となります。
+
+- FR-06
+    - 実現可能性について、システムが算出したスコアではなく、休暇交渉のやり取りから必要に応じて弁護士エージェントにエスカレを走らせてください。"
+**AI Response**: "Updated `絶対休めるモード` to remove the requirement to present alternatives, and changed the lawyer-agent escalation trigger from score-based feasibility to the actual vacation negotiation exchange."
+**Context**: INCEPTION - Requirements refinement during User Stories planning
+
+---
