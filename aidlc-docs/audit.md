@@ -1276,3 +1276,15 @@ FR-05のスコアリングと業務影響判定については、休むための
 **Context**: INCEPTION - Requirements refinement during User Stories planning
 
 ---
+
+## Requirements Mode and Calendar Update Request
+**Timestamp**: 2026-05-06T22:32:17+09:00
+**User Input**: "[requirements.md](aidlc-docs/inception/requirements/requirements.md) 
+- バレずに休みたいモード: 削除してください。
+- できれば休みたいモード: 有給取得ができなかった場合の想定挙動を教えてほしい。
+    - ユーザに交渉相手とのやり取りについて素直なFBが返ってくることが想定動作であり、絶対休みたいモードのような挙動が行われないか懸念。
+- 休暇交渉がうまくいった際には、Googleカレンダーへの休暇取得投入まで行うことを機能要件に追加してほしい。"
+**AI Response**: "Removed `バレずに休みたいモード`, clarified that `できれば休みたいモード` returns honest negotiation feedback without escalation behavior like `絶対休めるモード`, and added a new functional requirement for Google Calendar leave registration after successful negotiation."
+**Context**: INCEPTION - Requirements refinement during User Stories planning
+
+---
