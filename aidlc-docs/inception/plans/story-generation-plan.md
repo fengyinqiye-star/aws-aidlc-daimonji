@@ -1,141 +1,142 @@
-# Story Generation Plan
+# ストーリー生成計画
 
-## Purpose
-Create user-centered story artifacts from the approved requirements so the team has clear personas, testable acceptance criteria, and a shared understanding of the MVP workflow.
+## 目的
+承認済みの要件からユーザー中心のストーリー成果物を作成し、チームが明確なペルソナ、テスト可能な受け入れ条件、および MVP ワークフローの共通理解を持てるようにする。
 
-## Recommended Story Strategy
-- **Recommended approach**: User Journey-Based with feature groupings inside each journey
-- **Why this is recommended**: The MVP is chat-first and its value depends on the end-to-end flow from request intake through analysis, review, and Slack posting. Journey-first stories will make that flow easier to validate while still letting us group acceptance criteria by feature area.
+## 推奨ストーリー戦略
+- **推奨アプローチ**: ユーザージャーニー起点で整理し、その中で機能別にグルーピングする
+- **推奨理由**: この MVP はチャットファーストであり、価値は依頼受付から分析、レビュー、Slack 交渉、必要時の弁護士エージェント参加、交渉成立後の Google Calendar 登録までの一連の流れに依存する。ジャーニー起点で整理することで流れ全体を検証しやすくしつつ、受け入れ条件は機能単位でも整理できる。
 
-## Story Breakdown Options
+## ストーリー分解の選択肢
 
-### Option A: User Journey-Based
-- Best for mapping the end-to-end flow from chat input to Slack posting
-- Strong for demo validation and user acceptance
-- Can become broad if stories are not split carefully
+### Option A: ユーザージャーニー起点
+- チャット入力から Slack 投稿、Google Calendar 登録までの一連の流れを表現しやすい
+- デモ検証とユーザー受け入れ確認に強い
+- 分割が甘いと 1 ストーリーが広くなりやすい
 
-### Option B: Feature-Based
-- Best for aligning with implementation areas such as chat, scoring, Slack review, and orchestration
-- Easy for engineering handoff
-- Can hide cross-screen workflow dependencies
+### Option B: 機能起点
+- チャット、交渉分析、Slack レビュー、マルチエージェント制御、カレンダー登録などの実装領域に合わせやすい
+- エンジニアへの引き渡しがしやすい
+- 画面横断のワークフロー依存が見えにくくなることがある
 
-### Option C: Persona-Based
-- Best for highlighting differences between requester, stakeholder, and demo presenter needs
-- Good when role-specific behavior is dominant
-- Can duplicate shared workflow details across personas
+### Option C: ペルソナ起点
+- 依頼者、関係者、デモ実施者ごとの差分を強調しやすい
+- 役割ごとの振る舞いが重要な場合に向く
+- 共通フローの記述が重複しやすい
 
-### Option D: Epic-Based
-- Best for creating a hierarchy of epics and smaller child stories
-- Useful when the team wants a backlog-ready structure immediately
-- Requires more up-front organization decisions
+### Option D: エピック起点
+- エピックと子ストーリーの階層構造を作りやすい
+- すぐにバックログへ落とし込みたい場合に向く
+- 事前に整理すべき構造判断が増える
 
-### Option E: Other (please describe after [Answer]: tag below)
+### Option E: その他（[Answer]: の後に記述してください）
 
-## Planning Checklist
-- [x] Review the approved requirements and existing workflow state
-- [x] Confirm that User Stories adds clear value for this project
-- [ ] Resolve story planning questions in this document
-- [ ] Confirm the final story breakdown approach
-- [ ] Confirm persona scope and story granularity
-- [ ] Confirm acceptance criteria style and demo emphasis
-- [ ] Approve this plan for story generation
-- [ ] Generate `aidlc-docs/inception/user-stories/personas.md`
-- [ ] Generate `aidlc-docs/inception/user-stories/stories.md`
-- [ ] Verify every generated story follows INVEST expectations
-- [ ] Map personas to the generated stories
-- [ ] Verify extension compliance summary for this stage
-- [ ] Present generated User Stories for approval
+## 計画チェックリスト
+- [x] 承認済み要件と既存ワークフロー状態を確認する
+- [x] このプロジェクトで User Stories に明確な価値があることを確認する
+- [x] この文書内の計画質問を解消する
+- [x] 最終的なストーリー分解アプローチを確定する
+- [x] ペルソナ範囲とストーリー粒度を確定する
+- [x] 受け入れ条件の重みづけとデモ重視点を確定する
+- [x] この計画を承認する
+- [x] `aidlc-docs/inception/user-stories/personas.md` を生成する
+- [x] `aidlc-docs/inception/user-stories/stories.md` を生成する
+- [x] すべての生成ストーリーが INVEST を満たすことを確認する
+- [x] 生成したストーリーにペルソナを対応付ける
+- [x] このステージの拡張ルール適用サマリーを確認する
+- [x] 生成した User Stories を承認依頼に回す
 
-## Planning Questions
+## 計画質問
 
-Please answer every question by filling in the letter after `[Answer]:`. If you choose the last option, add your description after the letter.
+各質問について `[Answer]:` の後ろに回答を記入してください。最後の選択肢を選ぶ場合は、選択肢の文字に加えて内容も記入してください。
 
 ## Question 1
-Which story breakdown approach should be the primary structure for this MVP?
+この MVP のストーリー分解の主軸はどれにしますか。
 
-A) User journey-based, centered on the end-to-end vacation request flow
-B) Feature-based, centered on functional areas such as chat, analysis, and Slack review
-C) Persona-based, centered on requester, stakeholder, and demo presenter needs
-D) Epic-based, with epics and smaller child stories
-E) Other (please describe after [Answer]: tag below)
+A) 有休交渉のエンドツーエンドフローを中心にしたユーザージャーニー起点
+B) チャット、交渉分析、Slack レビュー、Calendar 登録などの機能起点
+C) 依頼者、関係者、デモ実施者のニーズを中心にしたペルソナ起点
+D) エピックと子ストーリーで整理するエピック起点
+E) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:A
 
 ## Question 2
-How should I treat the demo presenter persona in the story set?
+デモ実施者ペルソナはストーリー群の中でどう扱いますか。
 
-A) Include the demo presenter as a full persona with dedicated stories
-B) Include the demo presenter only where demo reliability and fallback behavior matter
-C) Keep personas limited to product users and reflect demo needs only in acceptance criteria
-D) Other (please describe after [Answer]: tag below)
+A) 独立したストーリーを持つフルペルソナとして含める
+B) デモ信頼性やフォールバックが関係する箇所だけで扱う
+C) プロダクト利用者だけをペルソナとし、デモ観点は受け入れ条件にのみ反映する
+D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:A
 
 ## Question 3
-What level of story granularity do you want for this stage?
+このステージで求めるストーリー粒度はどれですか。
 
-A) Lean MVP stories only, with broader scope per story
-B) Medium granularity, splitting major user journeys into several testable stories
-C) Fine granularity, with small backlog-ready stories for each meaningful behavior
-D) Other (please describe after [Answer]: tag below)
+A) MVP の大きめストーリー中心でよい
+B) 大きなジャーニーを複数のテスト可能なストーリーへ分割する中程度の粒度
+C) それぞれの意味ある振る舞いごとに細かく分けるバックログ準備向け粒度
+D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:D: 絶対休みたいモード、できれば休みたいモードそれぞれのE2Eのユーザストーリで、その2パターンあればよい。
 
 ## Question 4
-What should acceptance criteria emphasize most strongly?
+受け入れ条件で最も重視すべき観点はどれですか。
 
-A) Demo success and end-to-end happy-path validation
-B) Product behavior and user experience clarity
-C) Operational edge cases and fallback behavior
-D) Equal balance across happy path, UX clarity, and fallback behavior
-E) Other (please describe after [Answer]: tag below)
+A) デモ成功とエンドツーエンドのハッピーパス
+B) プロダクト挙動とユーザー体験の明確さ
+C) 運用上のエッジケース、フォールバック、弁護士エージェントのエスカレーション挙動
+D) ハッピーパス、UX、エスカレーション挙動、フォールバックを均等に重視する
+E) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:E: ハッピーパス、UX、エスカレーション挙動を均等に重視する
 
 ## Question 5
-How should future-scope ideas such as expansion beyond vacation requests be represented?
+有休交渉以外への将来拡張は、User Stories 上でどう扱いますか。
 
-A) Exclude them completely from User Stories and keep stories MVP-only
-B) Mention them briefly in personas or notes, but do not create stories for them
-C) Create clearly labeled future stories separate from MVP stories
-D) Other (please describe after [Answer]: tag below)
+A) 完全に除外し、MVP のみを書く
+B) ペルソナや注記に軽く触れるが、ストーリー化はしない
+C) MVP と分離した将来用ストーリーとして明示する
+D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:C
 
 ## Question 6
-Which language should be the primary language of the generated User Stories artifacts?
+生成する User Stories 成果物の主言語はどれにしますか。
 
-A) Japanese only
-B) Japanese primary with limited English technical labels where useful
-C) Bilingual Japanese and English throughout
-D) Other (please describe after [Answer]: tag below)
+A) 日本語のみ
+B) 日本語を主とし、必要な箇所だけ英語ラベルを併記する
+C) 全体を日英併記にする
+D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]: A
 
-## Story Artifact Plan
-- [ ] Create `personas.md` with named personas, goals, motivations, frustrations, and success signals
-- [ ] Create `stories.md` with user stories in a consistent template
-- [ ] Include acceptance criteria for every story
-- [ ] Ensure stories are Independent, Negotiable, Valuable, Estimable, Small, and Testable
-- [ ] Map each story to one or more personas
-- [ ] Clearly distinguish MVP stories from non-MVP notes
+## ストーリー成果物計画
+- [ ] `personas.md` を作成し、名前、目的、動機、困りごと、成功条件を記載する
+- [ ] `stories.md` を作成し、一貫したテンプレートでユーザーストーリーを書く
+- [ ] すべてのストーリーに受け入れ条件を含める
+- [ ] ストーリーが Independent, Negotiable, Valuable, Estimable, Small, Testable を満たすことを確認する
+- [ ] 各ストーリーに 1 つ以上のペルソナを対応付ける
+- [ ] MVP ストーリーと非 MVP の注記を明確に分ける
 
-## Expected Story Generation Method
-- Start from the approved requirements and major user journeys
-- Define personas first so story perspective is stable
-- Break stories using the approved structure from Question 1
-- Write acceptance criteria in clear, testable language
-- Keep implementation detail out of the stories unless needed to explain observable behavior
+## 想定する生成手順
+- 承認済み要件と主要ユーザージャーニーから出発する
+- 先にペルソナを定義し、ストーリーの視点を安定させる
+- Question 1 で承認された分解方針でストーリーを分ける
+- 受け入れ条件は明確でテスト可能な表現で書く
+- 2 つのモード差分、弁護士エージェント参加、交渉成立後の Google Calendar 登録をストーリーに反映する
+- 実装詳細は、観測可能な振る舞いを説明するために必要な場合を除いて書かない
 
-## Extension Compliance Summary
+## 拡張ルール適用サマリー
 
 ### Security Baseline
 - **Status**: N/A
-- **Rationale**: Disabled in `aidlc-docs/aidlc-state.md`.
+- **Rationale**: `aidlc-docs/aidlc-state.md` で無効化されているため。
 
 ### Property-Based Testing
 - **Status**: N/A
-- **Rationale**: PBT enforcement starts in later stages and does not block User Stories planning.
+- **Rationale**: PBT の強制適用は後続ステージから始まり、User Stories 計画ではブロッカーにならないため。
 
-## Approval Gate
-After all `[Answer]:` fields are completed, review this plan and confirm whether to proceed with story generation.
+## 承認ゲート
+すべての `[Answer]:` が埋まったら、この計画を確認し、ストーリー生成へ進めてよいかを明示的に承認してください。
