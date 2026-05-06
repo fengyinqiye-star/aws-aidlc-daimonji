@@ -1301,3 +1301,13 @@ FR-05のスコアリングと業務影響判定については、休むための
 **Context**: INCEPTION - Requirements refinement during User Stories planning
 
 ---
+
+## Requirements Lawyer Participation Update Request
+**Timestamp**: 2026-05-06T22:49:20+09:00
+**User Input**: "[requirements.md](aidlc-docs/inception/requirements/requirements.md) 
+- FR-03
+絶対休めるモード: 必要に応じて弁護士エージェントへのエスカレーションを実施すること。その後、弁護士エージェントが該当スレッドでやり取りに参加すること。"
+**AI Response**: "Updated `FR-03` so `絶対休めるモード` requires actual escalation to the lawyer sub-agent when needed, and clarified that the lawyer sub-agent participates in the negotiation thread after escalation."
+**Context**: INCEPTION - Requirements refinement during User Stories planning
+
+---
