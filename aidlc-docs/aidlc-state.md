@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-04T21:37:02+09:00
-- **Current Stage**: INCEPTION Complete - Ready for CONSTRUCTION
+- **Current Stage**: CONSTRUCTION - Functional Design (Infrastructure and Operational Support / Planning)
 
 ## Execution Plan Summary
 - **Total Stages**: 10
@@ -48,7 +48,8 @@
 - [ ] Operations
 
 ## Current Status
-- **Lifecycle Phase**: INCEPTION
-- **Current Stage**: Complete
-- **Next Stage**: CONSTRUCTION - Functional Design
-- **Status**: Ready to proceed when implementation starts
+- **Lifecycle Phase**: CONSTRUCTION
+- **Current Stage**: Functional Design
+- **Current Unit**: Infrastructure and Operational Support
+- **Next Stage**: Functional Design questions and artifact generation
+- **Status**: In progress on branch `construction`

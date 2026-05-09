@@ -83,6 +83,15 @@ All subsequent rule detail file references (e.g., `common/process-overview.md`, 
 
 ---
 
+## Construction Phase Start Request
+**Timestamp**: 2026-05-09T23:58:19+09:00
+**User Input**: "OKです。ではCONSTRUCTIONに入っていきましょうか。
+新規にconstructionというブランチを作成しましょうか。レビュー依頼単位でPR作成していくような形でいきましょう。"
+**AI Response**: "Started the CONSTRUCTION phase, created the `construction` branch from the current documentation branch, selected `Infrastructure and Operational Support` as the first unit by dependency order, and began Functional Design planning for review-sized PR execution."
+**Context**: CONSTRUCTION - phase transition and branch strategy
+
+---
+
 # INCEPTION PHASE
 
 **Purpose**: Planning, requirements gathering, and architectural decisions
@@ -1480,5 +1489,22 @@ FR-05のスコアリングと業務影響判定については、休むための
 Inceptionを完了させてください。READMEもInception完了に併せ更新しましょうか。"
 **AI Response**: "Treated the message as approval of Units Generation, marked INCEPTION complete, updated `aidlc-docs/aidlc-state.md`, and refreshed `README.md` to reflect that INCEPTION is complete and CONSTRUCTION has not started yet."
 **Context**: INCEPTION - Units Generation approval and Inception completion
+
+---
+
+## Functional Design Answers Intake
+**Timestamp**: 2026-05-10T00:11:14+09:00
+**User Input**: "[infrastructure-and-operational-support-functional-design-plan.md](aidlc-docs/construction/plans/infrastructure-and-operational-support-functional-design-plan.md) 
+質問に回答しました。"
+**AI Response**: "Validated the completed answers for the Infrastructure and Operational Support functional design plan, found no blocking ambiguity, and generated the functional design artifacts under `aidlc-docs/construction/infrastructure-and-operational-support/functional-design/`."
+**Context**: CONSTRUCTION - Functional Design generation
+
+---
+
+## Functional Design Approval Prompt
+**Timestamp**: 2026-05-10T00:11:14+09:00
+**User Input**: ""
+**AI Response**: "Functional design complete for `Infrastructure and Operational Support`. Requested review and approval of the functional design artifacts before proceeding to NFR Requirements."
+**Context**: CONSTRUCTION - Functional Design approval gate
 
 ---
