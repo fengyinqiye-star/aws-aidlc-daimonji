@@ -12,17 +12,17 @@
 
 ## 計画チェックリスト
 - [x] 要件、ユーザーストーリー、アプリケーション設計、実行計画を確認する
-- [ ] この文書内の分解質問を解消する
-- [ ] ストーリーのグルーピング方針を確定する
-- [ ] 単位間依存関係の扱いを確定する
-- [ ] チーム/責務境界の考え方を確定する
-- [ ] コード配置戦略を確定する
-- [ ] `aidlc-docs/inception/application-design/unit-of-work.md` を生成する
-- [ ] `aidlc-docs/inception/application-design/unit-of-work-dependency.md` を生成する
-- [ ] `aidlc-docs/inception/application-design/unit-of-work-story-map.md` を生成する
-- [ ] 単位境界と依存関係の妥当性を確認する
-- [ ] すべてのストーリーがいずれかの単位に割り当たっていることを確認する
-- [ ] 承認依頼へ進める
+- [x] この文書内の分解質問を解消する
+- [x] ストーリーのグルーピング方針を確定する
+- [x] 単位間依存関係の扱いを確定する
+- [x] チーム/責務境界の考え方を確定する
+- [x] コード配置戦略を確定する
+- [x] `aidlc-docs/inception/application-design/unit-of-work.md` を生成する
+- [x] `aidlc-docs/inception/application-design/unit-of-work-dependency.md` を生成する
+- [x] `aidlc-docs/inception/application-design/unit-of-work-story-map.md` を生成する
+- [x] 単位境界と依存関係の妥当性を確認する
+- [x] すべてのストーリーがいずれかの単位に割り当たっていることを確認する
+- [x] 承認依頼へ進める
 
 ## 予定成果物
 - `unit-of-work.md`: 単位定義、責務、コード構成方針
@@ -41,7 +41,7 @@ B) ワークフロー単位: Chat Intake / Negotiation / Escalation / Calendar R
 C) デプロイ単位: 将来のデプロイ境界を意識したサービス寄り分割
 D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:A
 
 ## Question 2
 フロントエンドは独立した 1 単位として扱いますか、それともバックエンドの各機能単位に対応づけますか。
@@ -51,7 +51,7 @@ B) 各バックエンド機能単位に対応する形で分散させる
 C) フロントエンドは 2 単位以上に分ける
 D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:A
 
 ## Question 3
 弁護士エージェント参加の処理はどこに寄せますか。
@@ -61,7 +61,7 @@ B) Escalation 専用の独立単位にする
 C) オーケストレーション単位に含める
 D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:A
 
 ## Question 4
 Google Calendar 登録はどの単位で扱うのがよいですか。
@@ -71,7 +71,7 @@ B) Negotiation 単位に含める
 C) Integration 単位にまとめる
 D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:A
 
 ## Question 5
 コード構成はどれを基本にしますか。
@@ -81,7 +81,7 @@ B) 単一リポジトリ内で `apps` / `packages` 型の構成にする
 C) まずは最小構成で始め、後続で細分化する
 D) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:A
 
 ## Question 6
 単位分解で最も重視する観点はどれですか。
@@ -92,7 +92,7 @@ C) デモ成立までのスピード
 D) バランス重視
 E) その他（[Answer]: の後に記述してください）
 
-[Answer]:
+[Answer]:A
 
 ## 分解方針メモ
 - モード差分が単位境界に埋もれないようにする
