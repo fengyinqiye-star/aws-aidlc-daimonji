@@ -70,7 +70,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 9
-- [ ] Generate integration-style tests for repository persistence behavior and workflow boundary contracts under `backend/infrastructure-support/tests/`.
+- [x] Generate integration-style tests for repository persistence behavior and workflow boundary contracts under `backend/infrastructure-support/tests/`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 10
