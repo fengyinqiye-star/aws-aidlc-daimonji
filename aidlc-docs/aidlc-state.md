@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-04T21:37:02+09:00
-- **Current Stage**: CONSTRUCTION - Infrastructure Design (Infrastructure and Operational Support / Planning)
+- **Current Stage**: CONSTRUCTION - Code Generation Part 1 (Infrastructure and Operational Support / Planning)
 
 ## Execution Plan Summary
 - **Total Stages**: 10
@@ -40,7 +40,7 @@
 - [x] Functional Design
 - [x] NFR Requirements
 - [x] NFR Design
-- [ ] Infrastructure Design
+- [x] Infrastructure Design
 - [ ] Code Generation
 - [ ] Build and Test
 
@@ -49,7 +49,7 @@
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Infrastructure Design
+- **Current Stage**: Code Generation Part 1
 - **Current Unit**: Infrastructure and Operational Support
-- **Next Stage**: Infrastructure design questions and artifact generation
-- **Status**: In progress on branch `construction`
+- **Next Stage**: Code generation step execution
+- **Status**: Code Generation Part 2 started on branch `construction`
