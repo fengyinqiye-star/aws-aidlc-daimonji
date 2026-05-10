@@ -82,7 +82,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 12
-- [ ] Generate GitHub Actions CD workflow or document fallback to AWS-native deployment services if GitHub Actions alone is insufficient for safe deployment.
+- [x] Generate GitHub Actions CD workflow or document fallback to AWS-native deployment services if GitHub Actions alone is insufficient for safe deployment.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 13

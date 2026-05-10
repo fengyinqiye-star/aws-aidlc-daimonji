@@ -1,0 +1,65 @@
+name: Deploy Infrastructure Support
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+      start_request_artifact_key:
+        description: S3 object key for the start request Lambda artifact
+        required: true
+        type: string
+      get_request_status_artifact_key:
+        description: S3 object key for the get request status Lambda artifact
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Terraform init
+        run: |
+          terraform -chdir=infra/terraform/environments/${{ inputs.environment }} init `
+            -backend-config="bucket=${{ vars.TERRAFORM_STATE_BUCKET }}" `
+            -backend-config="dynamodb_table=${{ vars.TERRAFORM_LOCK_TABLE }}" `
+            -backend-config="key=infrastructure-support/${{ inputs.environment }}/terraform.tfstate" `
+            -backend-config="region=${{ vars.AWS_REGION }}"
+        shell: pwsh
+
+      - name: Terraform apply
+        run: |
+          terraform -chdir=infra/terraform/environments/${{ inputs.environment }} apply -auto-approve `
+            -var="region=${{ vars.AWS_REGION }}" `
+            -var="name_prefix=${{ vars.TERRAFORM_NAME_PREFIX }}" `
+            -var="artifact_bucket=${{ vars.LAMBDA_ARTIFACT_BUCKET }}" `
+            -var="start_request_artifact_key=${{ inputs.start_request_artifact_key }}" `
+            -var="get_request_status_artifact_key=${{ inputs.get_request_status_artifact_key }}" `
+            -var="slack_webhook_secret_name=${{ vars.SLACK_WEBHOOK_SECRET_NAME }}"
+        shell: pwsh
