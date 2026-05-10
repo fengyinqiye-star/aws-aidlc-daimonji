@@ -9,3 +9,5 @@ export * from "./repositories/request-state-repository.js";
 export * from "./resilience/failure-classifier.js";
 export * from "./resilience/retry-coordinator.js";
 export * from "./notifications/notification-aggregator.js";
+export * from "./adapters/secrets-manager-reader.js";
+export * from "./adapters/slack-webhook-relay.js";

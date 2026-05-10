@@ -58,7 +58,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 6
-- [ ] Generate Slack high-severity notification relay and Secrets Manager access adapter code under `shared/adapters/` and `backend/infrastructure-support/src/`.
+- [x] Generate Slack high-severity notification relay and Secrets Manager access adapter code under `shared/adapters/` and `backend/infrastructure-support/src/`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 7
