@@ -90,7 +90,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 14
-- [ ] Generate code-stage documentation summary files under `aidlc-docs/construction/infrastructure-and-operational-support/code/` describing produced code, tests, Terraform, CI/CD, and operator setup.
+- [x] Generate code-stage documentation summary files under `aidlc-docs/construction/infrastructure-and-operational-support/code/` describing produced code, tests, Terraform, CI/CD, and operator setup.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 15
