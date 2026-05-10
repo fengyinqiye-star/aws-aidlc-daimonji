@@ -107,6 +107,14 @@ All subsequent rule detail file references (e.g., `common/process-overview.md`, 
 
 ---
 
+## Terraform CI Clarification and Fix Confirmation
+**Timestamp**: 2026-05-10T20:40:00+09:00
+**User Input**: "CI / Terraform Validate は失敗しております。これはAWS-Console、Github側のSecret設定を行っていないからですかね？ はい、修正しましょうか。"
+**AI Response**: "Clarified that the observed CI failure was caused by Terraform formatting rather than missing AWS or GitHub secret configuration, then confirmed and retained the Terraform and runtime fixes needed to address the CI issue."
+**Context**: CONSTRUCTION - Terraform CI troubleshooting
+
+---
+
 ## Construction Phase Start Request
 **Timestamp**: 2026-05-09T23:58:19+09:00
 **User Input**: "OKです。ではCONSTRUCTIONに入っていきましょうか。
