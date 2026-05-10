@@ -1,120 +1,120 @@
-# Infrastructure and Operational Support NFR Requirements
+# Infrastructure and Operational Support NFR 要件
 
-## Scope
-This document defines the non-functional requirements for the `Infrastructure and Operational Support` unit. The unit covers workflow orchestration, request tracking, retry handling, auditability, observability, and workflow-level failure handling for the MVP.
+## 対象範囲
+本書は `Infrastructure and Operational Support` Unit の非機能要件を定義する。この Unit は、MVP におけるワークフローオーケストレーション、リクエスト追跡、再試行制御、監査可能性、可観測性、およびワークフローレベルの障害処理を対象とする。
 
-## 1. Scalability Requirements
+## 1. スケーラビリティ要件
 
-### Target Load
-- The MVP must handle `3 to 5` concurrent requests during demo or validation usage.
-- The design does not need to optimize for high-volume production traffic at this stage.
+### 想定負荷
+- MVP はデモまたは検証利用において、`3〜5件` の並行リクエストを処理できる必要がある。
+- この段階では、高負荷な本番トラフィック向けの最適化は不要とする。
 
-### Scaling Goal
-- The unit should scale without architectural rework for small concurrent bursts.
-- Capacity planning should assume short-lived peaks rather than sustained high throughput.
+### スケーリング目標
+- 小規模な同時アクセス増加に対して、アーキテクチャの作り直しなしで追従できること。
+- キャパシティ計画は、継続的な高負荷ではなく短時間のピークを前提とする。
 
-### Design Implication
-- Stateless compute and managed orchestration are preferred.
-- Shared state must support concurrent updates safely at low-to-moderate request counts.
+### 設計への示唆
+- ステートレスな実行基盤とマネージドなオーケストレーションを優先する。
+- 共有状態は、低〜中程度の同時更新を安全に扱える必要がある。
 
-## 2. Performance Requirements
+## 2. 性能要件
 
-### User-Facing Progress Updates
-- Progress updates should be reflected to the user within a few seconds after a meaningful state change.
-- Real-time streaming is not required, but visible delay should stay low enough for demo credibility.
+### ユーザー向け進行状況更新
+- 意味のある状態変化が発生した後、数秒以内にユーザーへ進行状況が反映されること。
+- リアルタイムストリーミングは必須ではないが、デモとして不自然に見えない程度の低遅延は維持する。
 
-### Orchestration Responsiveness
-- State transition persistence and event recording should complete fast enough to keep downstream processing moving without noticeable lag.
-- Retry scheduling should not block UI progress feedback.
+### オーケストレーション応答性
+- 状態遷移の永続化とイベント記録は、後続処理が目立って遅延しない速度で完了すること。
+- 再試行スケジューリングが UI の進行状況表示を妨げてはならない。
 
-### Design Implication
-- Event writes and state updates should be lightweight and non-blocking where possible.
-- The system should favor quick acknowledgement plus asynchronous continuation.
+### 設計への示唆
+- イベント書き込みと状態更新は、可能な限り軽量かつ非ブロッキングであること。
+- システムは、まず迅速な受理を行い、その後は非同期継続を優先する。
 
-## 3. Availability Requirements
+## 3. 可用性要件
 
-### Availability Model
-- The MVP assumes a single-region deployment.
-- Regional disaster recovery is not required for this phase.
+### 可用性モデル
+- MVP は単一リージョン構成を前提とする。
+- このフェーズでは、リージョン障害向けの災害復旧は必須ではない。
 
-### Failure Handling Expectation
-- Major transient failures should be absorbed through automatic retries.
-- Manual recovery is acceptable for region-wide outages or severe platform failures.
+### 障害時の期待値
+- 主要な一時障害は自動再試行で吸収できること。
+- リージョン全体の障害や重大なプラットフォーム障害については、手動復旧を許容する。
 
-### Design Implication
-- Availability investment should focus on retryable component failures, not cross-region redundancy.
+### 設計への示唆
+- 可用性対策は、クロスリージョン冗長化ではなく、再試行可能なコンポーネント障害への対処を優先する。
 
-## 4. Reliability Requirements
+## 4. 信頼性要件
 
-### Retry Policy
-- Retryable failures should be retried automatically.
-- The retry model should include a delay before re-execution rather than immediate tight loops.
-- When retries are exhausted, the workflow must classify the result as `FATAL`.
+### 再試行ポリシー
+- 再試行可能な障害は自動再試行すること。
+- 再試行は即時ループではなく、一定の待ち時間を挟んで再実行すること。
+- 再試行上限を超えた場合、ワークフローは結果を `FATAL` と分類しなければならない。
 
-### Error Visibility
-- `FATAL` outcomes must be surfaced to the UI clearly.
-- The UI should show a visible failure indication such as toast or equivalent explicit error presentation.
+### エラー可視化
+- `FATAL` の結果は UI 上で明確に表示されなければならない。
+- UI はトースト等の明示的な失敗表現を用いて、ユーザーに可視化すること。
 
-### Failure Categorization
-- The system must distinguish transient infrastructure or API failures from business-logic failures.
-- Only transient failures are eligible for automatic retry.
+### 障害分類
+- システムは、一時的なインフラ/API 障害と業務ロジック上の失敗を区別しなければならない。
+- 自動再試行対象は一時障害に限る。
 
-## 5. Security Requirements
+## 5. セキュリティ要件
 
-### Minimum Protection Baseline
-- AWS managed service standard encryption is sufficient for MVP.
-- IAM-based access control is sufficient for MVP.
+### 最低限の保護基準
+- MVP では AWS マネージドサービス標準の暗号化で十分とする。
+- MVP では IAM ベースのアクセス制御で十分とする。
 
-### Deferred Security Items
-- Explicit retention and deletion policy are not mandatory in this stage.
-- Data masking beyond standard controlled access is not mandatory in this stage.
+### 後続へ送る項目
+- 明示的な保持期間や削除ポリシーは、この段階では必須としない。
+- 標準的なアクセス制御を超えるデータマスキングも、この段階では必須としない。
 
-### Design Implication
-- Service-to-service access boundaries should still be explicit.
-- Logs and audit data should avoid unnecessary exposure of sensitive raw payloads.
+### 設計への示唆
+- サービス間アクセス境界は明示しておく必要がある。
+- ログや監査データでは、機微な生ペイロードを不必要に露出させないこと。
 
-## 6. Observability Requirements
+## 6. 可観測性要件
 
-### Logging
-- CloudWatch Logs is the minimum required logging platform.
-- Logs should support troubleshooting by workflow, request, and failure event.
+### ログ
+- `CloudWatch Logs` を最低限必要なログ基盤とする。
+- ログは、ワークフロー、リクエスト、障害イベント単位でトラブルシュートできること。
 
-### Notification
-- In addition to CloudWatch Logs, AI-detectable high-level failures should be forwarded to Slack via webhook.
-- Slack notification is required only for high-severity operational failures, not every state transition.
+### 通知
+- `CloudWatch Logs` に加え、AI が検知可能な高重要度障害は Webhook 経由で Slack に通知する。
+- Slack 通知は、すべての状態変化ではなく、高重要度の運用障害に限定する。
 
-### Monitoring
-- Basic service metrics are required.
-- Full tracing is not mandatory in this stage.
+### 監視
+- 基本的なサービスメトリクスは必須とする。
+- フル機能のトレーシングはこの段階では必須ではない。
 
-### Design Implication
-- Structured logs are preferred even if full tracing is deferred.
-- Failure notifications should be low-noise and targeted.
+### 設計への示唆
+- フルトレーシングを後回しにする場合でも、構造化ログを優先する。
+- 障害通知はノイズを抑え、対象を絞ること。
 
-## 7. Maintainability Requirements
+## 7. 保守性要件
 
-### Documentation and Traceability
-- Workflow state changes, retry attempts, model decision summaries, and escalation reasons must remain traceable.
-- NFR choices should preserve compatibility with later Infrastructure Design decisions.
+### 文書化と追跡可能性
+- ワークフロー状態変更、再試行履歴、モデル判断要約、エスカレーション理由は追跡可能であること。
+- NFR 上の判断は、後続の Infrastructure Design と整合が取れるようにすること。
 
-### Change Flexibility
-- The orchestration core may use AWS-first patterns, but non-essential service choices should remain flexible until Infrastructure Design.
+### 変更柔軟性
+- オーケストレーションの中核は AWS 前提でよいが、非本質的なサービス選定は Infrastructure Design まで柔軟性を残す。
 
-## 8. Usability Requirements
+## 8. ユーザビリティ要件
 
-### End-User Experience
-- Progress visibility matters more than perfect real-time fidelity.
-- Errors must be visible and understandable enough for a demo operator to explain and recover.
+### エンドユーザー体験
+- 完全なリアルタイム性よりも、進行状況が見えることを優先する。
+- エラーは、デモ実施者が説明し復旧判断できる程度に、明確で理解しやすく表示される必要がある。
 
-### Operational Experience
-- Logs and notifications must make it possible to identify whether the issue is transient, business-related, or fatal.
+### 運用体験
+- ログと通知によって、その問題が一時障害・業務起因・致命的障害のどれかを識別できる必要がある。
 
-## 9. Extension Compliance
+## 9. 拡張ルール適合性
 
 ### Security Baseline
-- Status: N/A
-- Rationale: The extension is disabled in `aidlc-state.md`.
+- 状態: N/A
+- 理由: `aidlc-state.md` で当該拡張が無効化されている。
 
 ### Property-Based Testing
-- Status: N/A
-- Rationale: This stage defines NFR expectations and tech direction only; concrete PBT targets belong to later design or testing stages.
+- 状態: N/A
+- 理由: この段階は NFR と技術方針の定義であり、具体的な PBT 対象は後続の設計またはテスト段階で扱う。

@@ -1,76 +1,76 @@
-# Infrastructure and Operational Support Tech Stack Decisions
+# Infrastructure and Operational Support 技術スタック判断
 
-## Decision Summary
-The unit will stay AWS-oriented, but only the orchestration core is fixed at this stage. Other detailed service mappings may stay flexible until Infrastructure Design.
+## 判断サマリー
+この Unit は AWS 指向を維持するが、この段階で固定するのはオーケストレーションの中核のみとする。その他の詳細なサービスマッピングは、Infrastructure Design まで柔軟性を残す。
 
-## 1. Confirmed Direction
+## 1. 現時点で確定した方針
 
-### Orchestration
-- `AWS Step Functions` remains the primary orchestration candidate.
-- Reason:
-  - The unit centers on state transitions, retries, waiting, and branching.
-  - The workload is asynchronous and workflow-driven.
-  - The MVP needs visible orchestration behavior more than custom workflow runtime logic.
+### オーケストレーション
+- `AWS Step Functions` を主要なオーケストレーション候補とする。
+- 理由:
+  - この Unit は状態遷移、再試行、待機、分岐を中心に構成される。
+  - 処理は非同期かつワークフロー駆動である。
+  - MVP では、独自ワークフローランタイムよりも、見える形でのオーケストレーション挙動が重要である。
 
-### Compute
-- `AWS Lambda` remains the primary execution candidate for workflow tasks.
-- Reason:
-  - MVP concurrency is low to moderate.
-  - Stateless execution is sufficient for orchestration-adjacent operations.
-  - Lambda aligns with event-driven processing and small operational overhead.
+### 実行基盤
+- ワークフロータスクの主要実行候補として `AWS Lambda` を採用する。
+- 理由:
+  - MVP の並行度は低〜中程度である。
+  - オーケストレーション周辺処理にはステートレス実行で十分である。
+  - Lambda はイベント駆動処理と小さい運用負荷に適している。
 
-### State and Tracking
-- `Amazon DynamoDB` remains the primary tracking-store candidate.
-- Reason:
-  - Request state and event history fit key-value/document access patterns.
-  - Low-latency reads and writes support quick progress updates.
-  - Small concurrent workloads do not justify a heavier relational dependency yet.
+### 状態管理と追跡
+- 追跡ストアの主要候補として `Amazon DynamoDB` を採用する。
+- 理由:
+  - Request 状態とイベント履歴は、キー・バリュー/ドキュメント型アクセスと相性がよい。
+  - 低レイテンシな読み書きは、素早い進行状況更新に向いている。
+  - 小規模な並行ワークロードでは、より重いリレーショナル依存はまだ不要である。
 
-### Logging and Metrics
-- `Amazon CloudWatch Logs` and basic `CloudWatch Metrics` remain the default observability baseline.
-- Reason:
-  - They satisfy MVP logging and basic monitoring needs.
-  - They integrate naturally with Lambda and Step Functions.
+### ログとメトリクス
+- `Amazon CloudWatch Logs` と基本的な `CloudWatch Metrics` を既定の可観測性基盤とする。
+- 理由:
+  - MVP に必要なログと基本監視を満たせる。
+  - Lambda および Step Functions との統合が自然である。
 
-## 2. Additional Operational Choice
+## 2. 追加の運用判断
 
-### Failure Notification
-- `Slack Webhook` is the preferred notification mechanism for AI-detectable high-severity failures.
-- Reason:
-  - The user explicitly requested Slack-based notification for higher-severity failures.
-  - It provides lightweight operational visibility without introducing a full alerting platform.
+### 障害通知
+- AI が検知可能な高重要度障害の通知機構として、`Slack Webhook` を優先する。
+- 理由:
+  - ユーザーが高重要度障害について Slack 通知を明示的に求めている。
+  - フル機能のアラート基盤を導入せずに、軽量な運用可視性を確保できる。
 
-## 3. Deferred Decisions
+## 3. 後続へ送る判断
 
-The following decisions are intentionally deferred to Infrastructure Design:
+以下の判断は、意図的に Infrastructure Design へ送る。
 
-- Whether to place `API Gateway` in front of all orchestration entry points or only selected ones
-- Whether any request tracking or event history should also be mirrored to another datastore
-- Whether tracing should use AWS X-Ray or another mechanism
-- Exact alert routing, retry notification thresholds, and log retention settings
-- Whether any components should move from Lambda to container-based runtime
+- `API Gateway` をすべてのオーケストレーション入口の前段に置くか、一部のみに限定するか
+- Request 追跡やイベント履歴を別ストアへも複製するか
+- トレーシングに AWS X-Ray を使うか、別手段を使うか
+- 通知先の詳細、再試行通知の閾値、ログ保持設定
+- 一部コンポーネントを Lambda からコンテナ実行基盤へ移すか
 
-## 4. Constraints
+## 4. 制約条件
 
-### Performance Constraint
-- The stack must support visible state changes within a few seconds.
+### 性能制約
+- 状態変化が数秒以内に可視化されることを、このスタックで支えられなければならない。
 
-### Availability Constraint
-- The stack only needs single-region resilience with retry-based recovery for transient faults.
+### 可用性制約
+- このスタックは、単一リージョン前提で、一時障害に対する再試行ベースの回復を満たせばよい。
 
-### Security Constraint
-- Managed encryption and IAM control are sufficient for MVP.
+### セキュリティ制約
+- MVP では、マネージド暗号化と IAM 制御で十分とする。
 
-### Operational Constraint
-- Fatal failures must be observable in both CloudWatch and Slack notification flow.
+### 運用制約
+- `FATAL` 障害は、CloudWatch と Slack 通知フローの両方で観測できなければならない。
 
-## 5. Non-Decisions at This Stage
+## 5. この段階では未確定の項目
 
-The following are not fixed yet:
+以下はまだ固定しない。
 
-- Detailed network topology
-- Secret storage mechanism selection beyond AWS-managed expectation
-- API surface partitioning across services
-- Exact webhook relay implementation pattern
+- 詳細なネットワークトポロジ
+- AWS マネージド前提を超えるシークレット保管方式の具体選定
+- サービス間 API 面の分割方針
+- Webhook 中継の具体実装パターン
 
-These should be finalized in `Infrastructure Design`, not earlier.
+これらは、現段階ではなく `Infrastructure Design` で確定する。
