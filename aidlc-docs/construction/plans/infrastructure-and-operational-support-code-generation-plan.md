@@ -50,7 +50,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 4
-- [ ] Generate request state and event log repository layer abstractions and DynamoDB-oriented implementations under `backend/infrastructure-support/src/`.
+- [x] Generate request state and event log repository layer abstractions and DynamoDB-oriented implementations under `backend/infrastructure-support/src/`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 5
