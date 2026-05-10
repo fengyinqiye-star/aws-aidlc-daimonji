@@ -115,6 +115,22 @@ All subsequent rule detail file references (e.g., `common/process-overview.md`, 
 
 ---
 
+## Local Terraform Verification Attempt
+**Timestamp**: 2026-05-10T20:45:00+09:00
+**User Input**: "ローカルにTerraformを入れたのでCIが通るか確認してください。"
+**AI Response**: "Attempted to run `terraform version`, `npm run terraform:fmt:check`, and `npm run terraform:validate`, but the current Codex shell still could not resolve `terraform`. Confirmed that the issue is local shell visibility rather than AWS or GitHub secret configuration."
+**Context**: CONSTRUCTION - Local Terraform verification
+
+---
+
+## Local Terraform Verification Success
+**Timestamp**: 2026-05-10T20:50:00+09:00
+**User Input**: "codexを再起動してTerraformコマンドが通ること確認できました。"
+**AI Response**: "Re-ran `terraform version`, `npm run terraform:fmt:check`, and `npm run terraform:validate`. Confirmed that `validate` passed immediately and `fmt -check` passed after applying Terraform formatting to `infra/terraform/modules/infrastructure_support/main.tf`."
+**Context**: CONSTRUCTION - Local Terraform verification success
+
+---
+
 ## Construction Phase Start Request
 **Timestamp**: 2026-05-09T23:58:19+09:00
 **User Input**: "OKです。ではCONSTRUCTIONに入っていきましょうか。

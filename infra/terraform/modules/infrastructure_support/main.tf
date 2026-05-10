@@ -122,7 +122,7 @@ data "aws_iam_policy_document" "lambda_execution" {
   }
 
   statement {
-    actions = ["states:StartExecution"]
+    actions   = ["states:StartExecution"]
     resources = [aws_sfn_state_machine.workflow.arn]
   }
 }

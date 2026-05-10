@@ -17,6 +17,7 @@ desktop.ini
 node_modules/
 dist/
 coverage/
+.terraform/
 
 # Env / secrets
 .env
