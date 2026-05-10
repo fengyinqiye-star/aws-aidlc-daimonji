@@ -42,7 +42,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 2
-- [ ] Generate shared domain and contract types for request state, event log, failure classification, retry policy, and workflow start payloads under `shared/types/`.
+- [x] Generate shared domain and contract types for request state, event log, failure classification, retry policy, and workflow start payloads under `shared/types/`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 3
