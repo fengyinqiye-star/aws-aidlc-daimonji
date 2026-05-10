@@ -4,14 +4,21 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest run --config vitest.config.ts --project unit",
     "test:integration": "vitest run --config vitest.config.ts --project integration"
   },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.922.0",
+    "@aws-sdk/client-sfn": "^3.922.0",
+    "@aws-sdk/lib-dynamodb": "^3.922.0"
+  },
   "devDependencies": {
     "@types/node": "^24.6.0",
+    "@types/aws-lambda": "^8.10.152",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   }

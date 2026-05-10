@@ -180,7 +180,7 @@ resource "aws_iam_role_policy" "step_functions_execution" {
 resource "aws_lambda_function" "start_request" {
   function_name = "${var.name_prefix}-start-request"
   role          = aws_iam_role.lambda_execution.arn
-  handler       = "dist/lambda/start-request.handler"
+  handler       = "backend/infrastructure-support/src/lambda/start-request.handler"
   runtime       = "nodejs22.x"
   timeout       = 30
   memory_size   = 512
@@ -203,7 +203,7 @@ resource "aws_lambda_function" "start_request" {
 resource "aws_lambda_function" "get_request_status" {
   function_name = "${var.name_prefix}-get-request-status"
   role          = aws_iam_role.lambda_execution.arn
-  handler       = "dist/lambda/get-request-status.handler"
+  handler       = "backend/infrastructure-support/src/lambda/get-request-status.handler"
   runtime       = "nodejs22.x"
   timeout       = 30
   memory_size   = 512

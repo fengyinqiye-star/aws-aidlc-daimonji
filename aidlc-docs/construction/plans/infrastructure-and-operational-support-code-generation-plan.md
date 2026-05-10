@@ -74,7 +74,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 10
-- [ ] Generate Terraform modules and environment composition for API Gateway, Lambda, Step Functions, DynamoDB, Secrets Manager, CloudWatch, and IAM under `infra/terraform/`.
+- [x] Generate Terraform modules and environment composition for API Gateway, Lambda, Step Functions, DynamoDB, Secrets Manager, CloudWatch, and IAM under `infra/terraform/`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 11
@@ -86,7 +86,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 13
-- [ ] Generate local wrapper commands and minimal README or runbook updates for CI parity, Terraform usage, and required AWS Console setup.
+- [x] Generate local wrapper commands and minimal README or runbook updates for CI parity, Terraform usage, and required AWS Console setup.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 14
