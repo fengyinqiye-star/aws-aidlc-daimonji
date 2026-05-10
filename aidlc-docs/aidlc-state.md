@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-04T21:37:02+09:00
-- **Current Stage**: CONSTRUCTION - Functional Design (Infrastructure and Operational Support / Planning)
+- **Current Stage**: CONSTRUCTION - NFR Requirements (Infrastructure and Operational Support / Planning)
 
 ## Execution Plan Summary
 - **Total Stages**: 10
@@ -37,7 +37,7 @@
 - [x] Units Generation
 
 ### CONSTRUCTION PHASE
-- [ ] Functional Design
+- [x] Functional Design
 - [ ] NFR Requirements
 - [ ] NFR Design
 - [ ] Infrastructure Design
@@ -49,7 +49,7 @@
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Functional Design
+- **Current Stage**: NFR Requirements
 - **Current Unit**: Infrastructure and Operational Support
-- **Next Stage**: Functional Design questions and artifact generation
+- **Next Stage**: NFR requirements questions and artifact generation
 - **Status**: In progress on branch `construction`
