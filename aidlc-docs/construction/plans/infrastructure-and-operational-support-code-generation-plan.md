@@ -46,7 +46,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 3
-- [ ] Generate application-level workflow starter and orchestration boundary code under `backend/infrastructure-support/src/` for `API Gateway -> Lambda -> Step Functions`.
+- [x] Generate application-level workflow starter and orchestration boundary code under `backend/infrastructure-support/src/` for `API Gateway -> Lambda -> Step Functions`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 4
