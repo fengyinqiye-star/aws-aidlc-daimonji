@@ -6,7 +6,11 @@ import type {
 
 import type { RequestEventLogRepository } from "../repositories/request-event-log-repository.js";
 import type { RequestStateRepository } from "../repositories/request-state-repository.js";
-import type { WorkflowStarter } from "../workflow/workflow-starter.js";
+import type { WorkflowStarterInput } from "../workflow/workflow-starter.js";
+
+export interface WorkflowStartPort {
+  start(input: WorkflowStarterInput): Promise<{ executionArn: string }>;
+}
 
 export interface StartRequestApiInput {
   requestId: string;
@@ -26,7 +30,7 @@ export class StartRequestHandler {
   constructor(
     private readonly stateRepository: RequestStateRepository,
     private readonly eventRepository: RequestEventLogRepository,
-    private readonly workflowStarter: WorkflowStarter
+    private readonly workflowStarter: WorkflowStartPort
   ) {}
 
   async handle(input: StartRequestApiInput): Promise<StartRequestApiResponse> {

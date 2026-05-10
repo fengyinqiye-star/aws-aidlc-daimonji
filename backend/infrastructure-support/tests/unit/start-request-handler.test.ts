@@ -5,10 +5,12 @@ import { StartRequestHandler } from "../../src/api/start-request-handler.js";
 describe("StartRequestHandler", () => {
   it("persists accepted state and starts the workflow", async () => {
     const stateRepository = {
-      save: vi.fn().mockResolvedValue(undefined)
+      save: vi.fn().mockResolvedValue(undefined),
+      findById: vi.fn().mockResolvedValue(null)
     };
     const eventRepository = {
-      append: vi.fn().mockResolvedValue(undefined)
+      append: vi.fn().mockResolvedValue(undefined),
+      listByRequestId: vi.fn().mockResolvedValue([])
     };
     const workflowStarter = {
       start: vi.fn().mockResolvedValue({

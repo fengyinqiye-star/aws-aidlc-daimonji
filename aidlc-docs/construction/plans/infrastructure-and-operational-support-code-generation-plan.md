@@ -78,7 +78,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 11
-- [ ] Generate GitHub Actions CI workflow to run unit and integration tests, plus Terraform validation/format/plan checks, using separate responsibility-based jobs.
+- [x] Generate GitHub Actions CI workflow to run unit and integration tests, plus Terraform validation/format/plan checks, using separate responsibility-based jobs.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 12

@@ -22,7 +22,8 @@ export class DynamoDbRequestEventLogRepository
   async listByRequestId(requestId: string): Promise<RequestEventRecord[]> {
     return this.client.query<RequestEventRecord>({
       tableName: this.tableName,
-      partitionKey: { pk: requestId }
+      partitionKey: { pk: requestId },
+      sortKeyPrefix: "EVENT#"
     });
   }
 }

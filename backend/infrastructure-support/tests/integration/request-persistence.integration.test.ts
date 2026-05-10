@@ -25,11 +25,22 @@ class InMemoryDynamoDbClient {
 
   async query<T>(input: QueryItemsInput): Promise<T[]> {
     const partitionKey = input.partitionKey.pk;
+    const sortKeyPrefix = input.sortKeyPrefix;
 
     return Array.from(this.store.entries())
-      .filter(([compositeKey]) =>
-        compositeKey.startsWith(`${input.tableName}|${partitionKey}|`)
-      )
+      .filter(([compositeKey]) => {
+        const expectedPrefix = `${input.tableName}|${partitionKey}|`;
+        if (!compositeKey.startsWith(expectedPrefix)) {
+          return false;
+        }
+
+        if (!sortKeyPrefix) {
+          return true;
+        }
+
+        const [, , sortKey] = compositeKey.split("|");
+        return sortKey.startsWith(sortKeyPrefix);
+      })
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([, value]) => value as T);
   }

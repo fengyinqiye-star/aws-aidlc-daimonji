@@ -8,9 +8,9 @@
     "test": "npm run test --prefix backend/infrastructure-support",
     "test:unit": "npm run test:unit --prefix backend/infrastructure-support",
     "test:integration": "npm run test:integration --prefix backend/infrastructure-support",
-    "ci:local": "npm run test:unit && npm run test:integration",
+    "ci:local": "npm run lint && npm run build && npm run test:unit && npm run test:integration && npm run terraform:fmt:check && npm run terraform:validate",
     "lint": "npm run lint --prefix backend/infrastructure-support",
     "terraform:fmt:check": "terraform -chdir=infra/terraform fmt -check -recursive",
-    "terraform:validate": "terraform -chdir=infra/terraform validate"
+    "terraform:validate": "terraform -chdir=infra/terraform/environments/dev init -backend=false && terraform -chdir=infra/terraform/environments/dev validate"
   }
 }
