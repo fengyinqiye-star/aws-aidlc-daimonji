@@ -11,3 +11,5 @@ export * from "./resilience/retry-coordinator.js";
 export * from "./notifications/notification-aggregator.js";
 export * from "./adapters/secrets-manager-reader.js";
 export * from "./adapters/slack-webhook-relay.js";
+export * from "./api/get-request-status-handler.js";
+export * from "./api/start-request-handler.js";

@@ -62,7 +62,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 7
-- [ ] Generate API layer entry handlers for infrastructure-support-owned public endpoints and workflow start endpoints under `backend/infrastructure-support/src/`.
+- [x] Generate API layer entry handlers for infrastructure-support-owned public endpoints and workflow start endpoints under `backend/infrastructure-support/src/`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 8
