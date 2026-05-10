@@ -6,3 +6,6 @@ export * from "./repositories/dynamodb-request-event-log-repository.js";
 export * from "./repositories/dynamodb-request-state-repository.js";
 export * from "./repositories/request-event-log-repository.js";
 export * from "./repositories/request-state-repository.js";
+export * from "./resilience/failure-classifier.js";
+export * from "./resilience/retry-coordinator.js";
+export * from "./notifications/notification-aggregator.js";

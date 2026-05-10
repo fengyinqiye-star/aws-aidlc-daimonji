@@ -54,7 +54,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 5
-- [ ] Generate failure classification, retry policy coordination, and notification aggregation logic under `backend/infrastructure-support/src/`.
+- [x] Generate failure classification, retry policy coordination, and notification aggregation logic under `backend/infrastructure-support/src/`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 6
