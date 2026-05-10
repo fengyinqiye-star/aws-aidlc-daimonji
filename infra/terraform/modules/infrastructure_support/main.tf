@@ -5,10 +5,16 @@ data "aws_partition" "current" {}
 resource "aws_dynamodb_table" "request_state" {
   name         = "${var.name_prefix}-request-state"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "requestId"
+  hash_key     = "pk"
+  range_key    = "sk"
 
   attribute {
-    name = "requestId"
+    name = "pk"
+    type = "S"
+  }
+
+  attribute {
+    name = "sk"
     type = "S"
   }
 
@@ -18,16 +24,16 @@ resource "aws_dynamodb_table" "request_state" {
 resource "aws_dynamodb_table" "request_event_log" {
   name         = "${var.name_prefix}-request-event-log"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "requestId"
-  range_key    = "eventKey"
+  hash_key     = "pk"
+  range_key    = "sk"
 
   attribute {
-    name = "requestId"
+    name = "pk"
     type = "S"
   }
 
   attribute {
-    name = "eventKey"
+    name = "sk"
     type = "S"
   }
 
@@ -117,9 +123,7 @@ data "aws_iam_policy_document" "lambda_execution" {
 
   statement {
     actions = ["states:StartExecution"]
-    resources = [
-      aws_sfn_state_machine.workflow.arn
-    ]
+    resources = [aws_sfn_state_machine.workflow.arn]
   }
 }
 
@@ -149,14 +153,6 @@ resource "aws_iam_role" "step_functions_execution" {
 
 data "aws_iam_policy_document" "step_functions_execution" {
   statement {
-    actions = ["lambda:InvokeFunction"]
-    resources = [
-      aws_lambda_function.start_request.arn,
-      aws_lambda_function.get_request_status.arn
-    ]
-  }
-
-  statement {
     actions = [
       "logs:CreateLogDelivery",
       "logs:GetLogDelivery",
@@ -180,7 +176,7 @@ resource "aws_iam_role_policy" "step_functions_execution" {
 resource "aws_lambda_function" "start_request" {
   function_name = "${var.name_prefix}-start-request"
   role          = aws_iam_role.lambda_execution.arn
-  handler       = "backend/infrastructure-support/src/lambda/start-request.handler"
+  handler       = "dist/backend/infrastructure-support/src/lambda/start-request.handler"
   runtime       = "nodejs22.x"
   timeout       = 30
   memory_size   = 512
@@ -189,10 +185,10 @@ resource "aws_lambda_function" "start_request" {
 
   environment {
     variables = {
-      REQUEST_STATE_TABLE    = aws_dynamodb_table.request_state.name
+      REQUEST_STATE_TABLE     = aws_dynamodb_table.request_state.name
       REQUEST_EVENT_LOG_TABLE = aws_dynamodb_table.request_event_log.name
-      STATE_MACHINE_ARN      = aws_sfn_state_machine.workflow.arn
-      SLACK_WEBHOOK_SECRET   = aws_secretsmanager_secret.slack_webhook.name
+      STATE_MACHINE_ARN       = aws_sfn_state_machine.workflow.arn
+      SLACK_WEBHOOK_SECRET    = aws_secretsmanager_secret.slack_webhook.name
     }
   }
 
@@ -203,7 +199,7 @@ resource "aws_lambda_function" "start_request" {
 resource "aws_lambda_function" "get_request_status" {
   function_name = "${var.name_prefix}-get-request-status"
   role          = aws_iam_role.lambda_execution.arn
-  handler       = "backend/infrastructure-support/src/lambda/get-request-status.handler"
+  handler       = "dist/backend/infrastructure-support/src/lambda/get-request-status.handler"
   runtime       = "nodejs22.x"
   timeout       = 30
   memory_size   = 512
@@ -225,12 +221,14 @@ resource "aws_lambda_function" "get_request_status" {
 locals {
   workflow_definition = jsonencode({
     Comment = "Infrastructure support workflow orchestration"
-    StartAt = "RecordAcceptance"
+    StartAt = "AcceptRequest"
     States = {
-      RecordAcceptance = {
-        Type     = "Task"
-        Resource = aws_lambda_function.start_request.arn
-        End      = true
+      AcceptRequest = {
+        Type = "Pass"
+        Result = {
+          status = "accepted"
+        }
+        End = true
       }
     }
   })

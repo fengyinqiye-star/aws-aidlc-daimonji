@@ -24,7 +24,10 @@ export class DocumentDynamoDbClient implements DynamoDbClient {
     await this.client.send(
       new PutCommand({
         TableName: input.tableName,
-        Item: input.item
+        Item: {
+          ...input.key,
+          ...input.item
+        }
       })
     );
   }
