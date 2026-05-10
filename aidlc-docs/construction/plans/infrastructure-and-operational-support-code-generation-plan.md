@@ -66,7 +66,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 8
-- [ ] Generate business logic unit tests for workflow start, state transitions, failure classification, retry behavior, and notification aggregation under `backend/infrastructure-support/tests/`.
+- [x] Generate business logic unit tests for workflow start, state transitions, failure classification, retry behavior, and notification aggregation under `backend/infrastructure-support/tests/`.
 - Story traceability: `US-01`, `US-02`
 
 ### Step 9
