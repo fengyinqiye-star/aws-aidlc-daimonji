@@ -94,7 +94,7 @@
 - Story traceability: `US-01`, `US-02`
 
 ### Step 15
-- [ ] Update README files at workspace root and under `backend/`, `frontend/`, and `infra/` to reflect generated application structure, CI/CD usage, Terraform usage, and developer/operator entry points.
+- [x] Update README files at workspace root and under `backend/`, `frontend/`, and `infra/` to reflect generated application structure, CI/CD usage, Terraform usage, and developer/operator entry points.
 - Story traceability: `US-01`, `US-02`
 
 ## Notes
