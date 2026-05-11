@@ -1,0 +1,19 @@
+{
+  "name": "aws-aidlc-daimonji",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Vacation negotiation MVP monorepo",
+  "scripts": {
+    "build": "npm run build --prefix backend/infrastructure-support",
+    "test": "npm run test --prefix backend/infrastructure-support",
+    "test:unit": "npm run test:unit --prefix backend/infrastructure-support",
+    "test:integration": "npm run test:integration --prefix backend/infrastructure-support",
+    "backend:check": "npm run lint && npm run build && npm run test:unit && npm run test:integration",
+    "ci:local": "npm run lint && npm run build && npm run test:unit && npm run test:integration && npm run terraform:fmt:check && npm run terraform:validate",
+    "lint": "npm run lint --prefix backend/infrastructure-support",
+    "terraform:init:dev": "terraform -chdir=infra/terraform/environments/dev init -backend=false",
+    "terraform:plan:dev": "npm run terraform:init:dev && terraform -chdir=infra/terraform/environments/dev plan -var-file=terraform.tfvars",
+    "terraform:fmt:check": "terraform -chdir=infra/terraform fmt -check -recursive",
+    "terraform:validate": "terraform -chdir=infra/terraform/environments/dev init -backend=false && terraform -chdir=infra/terraform/environments/dev validate"
+  }
+}

@@ -13,6 +13,12 @@ desktop.ini
 *.log
 *.tmp
 
+# Node / build outputs
+node_modules/
+dist/
+coverage/
+.terraform/
+
 # Env / secrets
 .env
 .env.local

@@ -1,0 +1,12 @@
+region                         = "ap-northeast-1"
+name_prefix                    = "vacation-negotiation-dev"
+artifact_bucket                = "replace-with-artifact-bucket"
+start_request_artifact_key     = "infrastructure-support/start-request.zip"
+get_request_status_artifact_key = "infrastructure-support/get-request-status.zip"
+slack_webhook_secret_name      = "vacation-negotiation/dev/slack-webhook"
+
+tags = {
+  Project     = "aws-aidlc-daimonji"
+  Environment = "dev"
+  ManagedBy   = "terraform"
+}
