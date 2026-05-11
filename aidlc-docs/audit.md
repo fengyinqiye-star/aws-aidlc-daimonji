@@ -1665,42 +1665,42 @@ Inceptionã‚’å®Œäº†ã•ã›ã¦ãã ã•ã„ã€‚READMEã‚‚Inceptionå®Œäº†ã«ä½µã›æ›´æ–
 ---
 ## AWS Console Setup Document Expansion
 **Timestamp**: 2026-05-11T00:20:00+09:00
-**User Input**: "[aws-console-cicd-setup.md](aidlc-docs/construction/build-and-test/aws-console-cicd-setup.md) ‚æ‚èì‹Æƒx[ƒX‚É×‚©‚¢è‡‚É—‚Æ‚µ‚Ä‚­‚¾‚³‚¢B"
+**User Input**: "[aws-console-cicd-setup.md](aidlc-docs/construction/build-and-test/aws-console-cicd-setup.md) ã‚ˆã‚Šä½œæ¥­ãƒ™ãƒ¼ã‚¹ã«ç´°ã‹ã„æ‰‹é †ã«è½ã¨ã—ã¦ãã ã•ã„ã€‚"
 **AI Response**: "Expanded `aws-console-cicd-setup.md` into a task-oriented step-by-step guide covering console navigation, trust policy editing, IAM permission attachment, GitHub variable setup, artifact upload, deployment execution, and post-deploy checks."
 **Context**: CONSTRUCTION - Build and Test documentation refinement
 
 ---
 ## IAM Role Name and Policy Selection Detail Expansion
 **Timestamp**: 2026-05-11T00:35:00+09:00
-**User Input**: "ƒ[ƒ‹–¼: aws-aidlc-daimonji-github-actions-terraform-deploy ‚Ü‚½A3-2‚É‚Â‚¢‚Ä‚ÍList, Read, Write, Permissons management, Tagging‚©‚ç‰½‚ğ‘I‚×‚Î‚¢‚¢‚©‚Ü‚Å—‚Æ‚µ‚ñ‚Å‚­‚¾‚³‚¢B"
+**User Input**: "ãƒ­ãƒ¼ãƒ«å: aws-aidlc-daimonji-github-actions-terraform-deploy ã¾ãŸã€3-2ã«ã¤ã„ã¦ã¯List, Read, Write, Permissons management, Taggingã‹ã‚‰ä½•ã‚’é¸ã¹ã°ã„ã„ã‹ã¾ã§è½ã¨ã—è¾¼ã‚“ã§ãã ã•ã„ã€‚"
 **AI Response**: "Updated `aws-console-cicd-setup.md` to use the requested IAM role name and expanded section 3-2 into per-service Visual editor access-level selections. Also corrected the Secrets Manager procedure to align with the current Terraform behavior, where the secret resource is created by Terraform and the secret value is set after deploy."
 **Context**: CONSTRUCTION - Build and Test documentation refinement
 
 ---
 ## Visual Editor Action Selection Detail Expansion
 **Timestamp**: 2026-05-11T00:45:00+09:00
-**User Input**: "3-2‚É‚Â‚¢‚ÄAˆÈ‰º‚ğ—á‚ÉƒJƒeƒSƒŠ‚©‚ç‰½‚ğ‘I‚×–ˆ‚¢‚Ì‚©‚Ü‚Å—‚Æ‚µ‚ñ‚Å‚­‚¾‚³‚¢B"
+**User Input**: "3-2ã«ã¤ã„ã¦ã€ä»¥ä¸‹ã‚’ä¾‹ã«ã‚«ãƒ†ã‚´ãƒªã‹ã‚‰ä½•ã‚’é¸ã¹æ¯ã„ã®ã‹ã¾ã§è½ã¨ã—è¾¼ã‚“ã§ãã ã•ã„ã€‚"
 **AI Response**: "Expanded section 3-2 of `aws-console-cicd-setup.md` to the AWS Console Visual editor level, including whether to use `All ... actions` for each access-level category or to select individual actions, with S3 called out as an individually scoped service and the other services documented with a pragmatic MVP selection strategy."
 **Context**: CONSTRUCTION - Build and Test documentation refinement
 
 ---
 ## Deploy Steps Clarification Request
 **Timestamp**: 2026-05-11T00:55:00+09:00
-**User Input**: "7‚É‚Â‚¢‚Ä‚ÍSlack‚ÌSecret–¼‚Å‚Í‚È‚­WebhookURL‚ğ“o˜^‚·‚éŠ´‚¶‚Å‚¢‚«‚Ü‚µ‚å‚¤‚©B 9‚©‚ç‚Ìè‡‚ª‚¢‚Ü‚¢‚¿‚í‚©‚è‚Ü‚¹‚ñB"
+**User Input**: "7ã«ã¤ã„ã¦ã¯Slackã®Secretåã§ã¯ãªãWebhookURLã‚’ç™»éŒ²ã™ã‚‹æ„Ÿã˜ã§ã„ãã¾ã—ã‚‡ã†ã‹ã€‚ 9ã‹ã‚‰ã®æ‰‹é †ãŒã„ã¾ã„ã¡ã‚ã‹ã‚Šã¾ã›ã‚“ã€‚"
 **AI Response**: "Clarified that the secret value should be the Slack webhook URL, while the variable stores the secret name, and explained the deployment flow from artifact packaging through S3 upload and manual GitHub Actions dispatch in concrete terms for the current repository structure."
 **Context**: CONSTRUCTION - Build and Test documentation clarification
 
 ---
 ## Lambda Artifact Packaging Request
 **Timestamp**: 2026-05-11T01:05:00+09:00
-**User Input**: "3, ‚É‚Â‚¢‚ÄÀs‚¢‚½‚¾‚¯‚Ü‚·‚©H Zipì¬‚Ü‚ÅÀ{‚µ‚Ä”z’u‚µ‚Ä‚­‚¾‚³‚¢B„‚Ì‚Ù‚¤‚ÅƒAƒbƒvƒ[ƒh‚µ‚Ä‚¨‚«‚Ü‚·B ƒAƒbƒvƒ[ƒhŒãZip‚ª•s—v‚È‚Ì‚Å‚ ‚ê‚Îíœ‚·‚×‚«‚©‚à‹³‚¦‚ÄB"
+**User Input**: "3, ã«ã¤ã„ã¦å®Ÿè¡Œã„ãŸã ã‘ã¾ã™ã‹ï¼Ÿ Zipä½œæˆã¾ã§å®Ÿæ–½ã—ã¦é…ç½®ã—ã¦ãã ã•ã„ã€‚ç§ã®ã»ã†ã§ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰ã—ã¦ãŠãã¾ã™ã€‚ ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰å¾ŒZipãŒä¸è¦ãªã®ã§ã‚ã‚Œã°å‰Šé™¤ã™ã¹ãã‹ã‚‚æ•™ãˆã¦ã€‚"
 **AI Response**: "Built `backend/infrastructure-support`, created a deployment ZIP at `backend/infrastructure-support/artifacts/infrastructure-support.zip`, and clarified that the same ZIP can be uploaded once and referenced by both Lambda artifact keys. Also clarified that the local ZIP can be deleted after upload if it is no longer needed."
 **Context**: CONSTRUCTION - Deployment artifact preparation
 
 ---
 ## Artifact Deployment Strategy Clarification
 **Timestamp**: 2026-05-12T09:10:00+09:00
-**User Input**: "ˆê’Uè“®‚ÅZIP‚ğ”z’u‚µ‚½‚Ì‚Å‚·‚ª‚»‚ê‚Å‚à¸”s‚µ‚Ä‚¢‚é‚æ‚¤‚ÅŒ´ˆö‚Í‚í‚©‚è‚Ü‚·‚©H ‚Ü‚½Aˆê’Uè“®‚Å”z’u‚µ‚Ä’Ê‚µ‚½ŒãCI.CD‚ğ®”õ‚·‚×‚«‚©AŒ»“_‚Å®”õ‚·‚×‚«‚©‚Ç‚Á‚¿H"
+**User Input**: "ä¸€æ—¦æ‰‹å‹•ã§ZIPã‚’é…ç½®ã—ãŸã®ã§ã™ãŒãã‚Œã§ã‚‚å¤±æ•—ã—ã¦ã„ã‚‹ã‚ˆã†ã§åŸå› ã¯ã‚ã‹ã‚Šã¾ã™ã‹ï¼Ÿ ã¾ãŸã€ä¸€æ—¦æ‰‹å‹•ã§é…ç½®ã—ã¦é€šã—ãŸå¾ŒCI.CDã‚’æ•´å‚™ã™ã¹ãã‹ã€ç¾æ™‚ç‚¹ã§æ•´å‚™ã™ã¹ãã‹ã©ã£ã¡ï¼Ÿ"
 **AI Response**: "Inspected the local deployment artifact and confirmed that the ZIP structure matches the current Terraform handler paths. Clarified that an S3 `NoSuchKey` failure after manual upload most likely means the uploaded S3 object key does not exactly match the workflow input values, and recommended getting one manual artifact-upload/deploy path green before automating packaging and upload in CI/CD."
 **Context**: CONSTRUCTION - Deployment troubleshooting and CI/CD sequencing
 
