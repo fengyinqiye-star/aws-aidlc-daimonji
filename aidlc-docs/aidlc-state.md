@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-04T21:37:02+09:00
-- **Current Stage**: CONSTRUCTION - Code Generation (Infrastructure and Operational Support / Review)
+- **Current Stage**: CONSTRUCTION - Build and Test (Infrastructure and Operational Support / Review)
 
 ## Execution Plan Summary
 - **Total Stages**: 10
@@ -49,7 +49,7 @@
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Code Generation
+- **Current Stage**: Build and Test
 - **Current Unit**: Infrastructure and Operational Support
-- **Next Stage**: Code Generation review approval or Build and Test planning
-- **Status**: Code Generation implementation complete on branch `construction`; awaiting user review
+- **Next Stage**: Build and Test review approval or Operations
+- **Status**: Build and Test instructions generated; awaiting user review
