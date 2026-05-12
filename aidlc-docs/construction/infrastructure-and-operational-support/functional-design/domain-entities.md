@@ -1,7 +1,7 @@
 # Infrastructure and Operational Support Domain Entities
 
 ## Request
-休暇交渉全体を表す主エンティティ。
+有休交渉 request 全体の現在状態を表す主エンティティ。
 
 ### 主な属性
 - `requestId`
@@ -12,18 +12,18 @@
 - `currentState`
 - `currentOwner`
 - `slackThreadRef`
+- `reviewStatus`
 - `calendarApprovalStatus`
 - `finalOutcome`
 - `createdAt`
 - `updatedAt`
 
 ### 説明
-- `mode` は `絶対休めるモード` または `できれば休みたいモード`
-- `currentState` は `受付` / `交渉中` / `要エスカレーション` / `成立` / `不成立` / `登録失敗`
-- `currentOwner` は現在の主要担当主体を示し、通常 AI、必要時に弁護士エージェントを含む
+- `currentOwner` は現在の主担当主体を示し、`ai`、`lawyer-agent`、`user-review` などを取る。
+- `reviewStatus` は Slack 投稿前の人手レビュー状態を保持する。
 
 ## RequestEvent
-Request に紐づく時系列イベント。
+request に紐づく時系列イベント。
 
 ### 主な属性
 - `eventId`
@@ -38,22 +38,61 @@ Request に紐づく時系列イベント。
 
 ### 主なイベント種別
 - `RequestAccepted`
-- `NegotiationStarted`
-- `SlackMessageSent`
+- `IntentExtracted`
+- `MissingInformationDetected`
+- `CalendarLoaded`
+- `TeamScheduleLoaded`
+- `VacationScoreCalculated`
+- `NegotiationPlanGenerated`
+- `SlackDraftGenerated`
+- `ReviewRequested`
+- `SlackMessagePosted`
 - `SlackReplyReceived`
-- `EscalationEvaluated`
+- `LawyerEscalationRequested`
 - `LawyerEscalationStarted`
-- `NegotiationSucceeded`
+- `NegotiationApproved`
 - `NegotiationRejected`
 - `CalendarApprovalRequested`
-- `CalendarApprovalGranted`
 - `CalendarRegistrationSucceeded`
 - `CalendarRegistrationFailed`
-- `RetryScheduled`
-- `FatalErrorRaised`
+- `FatalFailureRaised`
+
+## WorkflowTaskExecution
+Step Functions の task 単位の実行記録。
+
+### 主な属性
+- `executionId`
+- `requestId`
+- `taskName`
+- `attemptNumber`
+- `startedAt`
+- `finishedAt`
+- `result`
+- `failureCategory`
+- `errorSummary`
+
+### 説明
+- task 単位での成功・失敗を追跡し、どこで止まったかを明示する。
+
+## AgentRuntimeSession
+Bedrock AgentCore Runtime 上の agent 実行セッション情報。
+
+### 主な属性
+- `sessionId`
+- `requestId`
+- `agentType`
+- `runtimeRef`
+- `inputContextRef`
+- `startedAt`
+- `endedAt`
+- `outcome`
+
+### 説明
+- `agentType` は `negotiation-orchestrator` または `lawyer-agent`
+- `runtimeRef` はランタイム実体または実行先を参照する
 
 ## EscalationDecision
-弁護士エージェントへのエスカレーション判定結果。
+Lawyer Agent 参加の判定結果。
 
 ### 主な属性
 - `decisionId`
@@ -64,16 +103,16 @@ Request に紐づく時系列イベント。
 - `decidedAt`
 
 ### 説明
-- `decision` は `継続` または `要エスカレーション`
-- 判定理由は監査できる粒度で保持する
+- `decision` は `continue` または `escalate`
+- 判定理由は event log と監査の双方で参照可能とする
 
 ## RetryRecord
-一時障害に対する再試行制御情報。
+再試行制御の記録。
 
 ### 主な属性
 - `retryId`
 - `requestId`
-- `targetOperation`
+- `taskName`
 - `attemptNumber`
 - `maxAttempts`
 - `failureCategory`
@@ -82,11 +121,10 @@ Request に紐づく時系列イベント。
 - `result`
 
 ### 説明
-- `failureCategory` は少なくとも `Transient` と `Business` を持つ
-- `result` は `Pending` / `Succeeded` / `Exhausted`
+- `failureCategory` は `TransientFailure`、`BusinessFailure`、`IntegrationFailure`、`AgentRuntimeFailure`、`FatalFailure`
 
 ## CalendarApproval
-Calendar 登録前の最終確認を表す。
+Calendar 登録前の最終確認情報。
 
 ### 主な属性
 - `approvalId`
@@ -97,20 +135,61 @@ Calendar 登録前の最終確認を表す。
 - `answeredBy`
 
 ### 説明
-- `status` は `Pending` / `Approved` / `Declined`
-- `Approved` のときのみ Calendar Registration Unit を起動できる
+- `status` は `pending`、`approved`、`declined`
 
-## AuditEnvelope
-監査・可観測性のための補助エンティティ。
+## FrontendRuntimeContract
+Frontend Unit が Amplify Hosting から利用する公開境界の契約情報。
 
 ### 主な属性
-- `requestId`
-- `promptSummary`
-- `modelDecisionSummary`
-- `eventRefs`
-- `retryRefs`
-- `lastObservedAt`
+- `contractId`
+- `apiBaseUrl`
+- `startRequestEndpoint`
+- `getRequestEndpoint`
+- `requiredEnvironmentVariables`
+- `contractVersion`
 
 ### 説明
-- 内部プロンプトは全文ではなく要約のみ保持する
-- 後続 Unit はこの情報を使って Request Detail や障害表示を構築する
+- Amplify の詳細 IaC は持たないが、接続前提を先に固定するための契約である。
+
+## PhaseDriftFinding
+フェーズ乖離監視で検出された差分。
+
+### 主な属性
+- `findingId`
+- `phase`
+- `severity`
+- `expectedArtifactRef`
+- `actualStateSummary`
+- `recommendedAction`
+- `detectedAt`
+
+### 説明
+- `severity` は `Blocking`、`Material`、`Minor`
+
+## DriftIssueCandidate
+GitHub Issue 化する前の candidate。
+
+### 主な属性
+- `candidateId`
+- `findingId`
+- `issueTitle`
+- `issueBody`
+- `matchedExistingIssueRef`
+- `action`
+
+### 説明
+- `action` は `create` または `update-existing`
+
+## Testable Properties
+
+### WorkflowTaskExecution
+- Category: `Invariant`
+- Property: `taskName` は FR-09 対応の定義済みタスクリストに必ず属する
+
+### PhaseDriftFinding
+- Category: `Range constraints`
+- Property: `severity` は `Blocking / Material / Minor` のいずれか
+
+### FrontendRuntimeContract
+- Category: `Round-trip`
+- Property: contract を JSON 化して復元しても endpoint と environment variable 集合が不変

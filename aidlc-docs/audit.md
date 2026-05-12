@@ -1705,3 +1705,53 @@ Inceptionを完了させてください。READMEもInception完了に併せ更�
 **Context**: CONSTRUCTION - Deployment troubleshooting and CI/CD sequencing
 
 ---
+
+## Construction Restart Request
+**Timestamp**: 2026-05-12T10:25:00+09:00
+**User Input**: "ここまででInfraデプロイまではできたと思っておりますが、InceptionフェーズからConstructionフェーズまででズレがあります。
+以下の対応を行いましょう。
+1. Constructionフェーズをいったん最初に立ち返ってInceptionとの差分を見出し、Constructionフェーズを最初から順に再実施する。
+以下は現時点で発覚しているInceptionフェーズとの乖離となります。
+- Bedrockがデプロイされていない。
+- Amplify Hosting(Frontend)がデプロイされていない
+- 今回StepFunctionをオーケストレータとして利用しているが、Lamnbdaが2つしか実装されておらず、オーケストレータの意味をなしていない。
+    - Lamnbdaを今回のワークフロー毎に小分けし、StepFunction側でどこでミスったかをわかりやすくする
+
+2. Codex側のオートメーションでInception, Construction Operationそれぞれのフェーズで乖離がないかを発覚するエージェントループを追加したい。発覚した乖離はIssueへ自動登録をすることとする。"
+**AI Response**: "Started a Construction restart assessment to compare Inception artifacts against the implemented code and infrastructure, determine the earliest Construction stage that must be rerun, and define how to add Codex automation for phase drift detection and issue registration."
+**Context**: CONSTRUCTION - Restart assessment kickoff
+
+---
+
+## Construction Restart Assessment Artifacts
+**Timestamp**: 2026-05-12T10:40:00+09:00
+**User Input**: ""
+**AI Response**: "Created `construction-restart-gap-analysis.md`, `construction-restart-plan.md`, and `phase-drift-automation-plan.md`. Updated `aidlc-state.md` to reset the active Construction path to `Functional Design` for `Infrastructure and Operational Support`."
+**Context**: CONSTRUCTION - Restart assessment outputs
+
+---
+
+## Functional Design Restart Plan Prompt
+**Timestamp**: 2026-05-12T10:45:00+09:00
+**User Input**: ""
+**AI Response**: "Created `aidlc-docs/construction/plans/infrastructure-and-operational-support-functional-design-restart-plan.md` with restart-specific checklist items and clarification questions for Bedrock scope, Step Functions task granularity, Amplify Hosting scope, Lambda responsibility split, and Codex drift-monitoring cadence."
+**Context**: CONSTRUCTION - Functional Design restart planning gate
+
+---
+
+## Functional Design Restart Answers Intake
+**Timestamp**: 2026-05-12T11:00:00+09:00
+**User Input**: "[infrastructure-and-operational-support-functional-design-restart-plan.md](aidlc-docs/construction/plans/infrastructure-and-operational-support-functional-design-restart-plan.md) 
+質問に回答しましたので、進めてください。"
+**AI Response**: "Validated the restart answers, confirmed Bedrock dual-agent scope, FR-09-level Step Functions task decomposition, Amplify API-boundary-first treatment, explicit Lambda responsibility split, and daily drift-monitoring cadence. Regenerated the Functional Design artifacts for `Infrastructure and Operational Support` accordingly."
+**Context**: CONSTRUCTION - Functional Design restart generation
+
+---
+
+## Functional Design Restart Approval Prompt
+**Timestamp**: 2026-05-12T11:05:00+09:00
+**User Input**: ""
+**AI Response**: "Restarted functional design complete for `Infrastructure and Operational Support`. Requested review and approval of the updated functional design artifacts before proceeding to restarted NFR Requirements."
+**Context**: CONSTRUCTION - Functional Design restart approval gate
+
+---
