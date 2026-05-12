@@ -131,6 +131,14 @@ All subsequent rule detail file references (e.g., `common/process-overview.md`, 
 
 ---
 
+## Code Generation Approval and Build and Test Start
+**Timestamp**: 2026-05-11T00:10:00+09:00
+**User Input**: "承認します。次に進めましょう。CI/CDでAWS-Console側の作業は私がやるので手順など提示してください。"
+**AI Response**: "Treated the message as approval of Code Generation, moved the workflow into Build and Test, and started generating build/test instructions along with AWS Console and GitHub setup steps for CI/CD."
+**Context**: CONSTRUCTION - Build and Test start
+
+---
+
 ## Construction Phase Start Request
 **Timestamp**: 2026-05-09T23:58:19+09:00
 **User Input**: "OKです。ではCONSTRUCTIONに入っていきましょうか。
@@ -1653,5 +1661,47 @@ Inceptionを完了させてください。READMEもInception完了に併せ更�
 **User Input**: "承認します。実装へ移り、Step毎にCommitを行ってください。"
 **AI Response**: "Treated the message as approval of the Infrastructure and Operational Support code generation plan and started Code Generation Part 2 with per-step commits."
 **Context**: CONSTRUCTION - Code Generation approval and implementation start
+
+---
+## AWS Console Setup Document Expansion
+**Timestamp**: 2026-05-11T00:20:00+09:00
+**User Input**: "[aws-console-cicd-setup.md](aidlc-docs/construction/build-and-test/aws-console-cicd-setup.md) より作業ベースに細かい手順に落としてください。"
+**AI Response**: "Expanded `aws-console-cicd-setup.md` into a task-oriented step-by-step guide covering console navigation, trust policy editing, IAM permission attachment, GitHub variable setup, artifact upload, deployment execution, and post-deploy checks."
+**Context**: CONSTRUCTION - Build and Test documentation refinement
+
+---
+## IAM Role Name and Policy Selection Detail Expansion
+**Timestamp**: 2026-05-11T00:35:00+09:00
+**User Input**: "ロール名: aws-aidlc-daimonji-github-actions-terraform-deploy また、3-2についてはList, Read, Write, Permissons management, Taggingから何を選べばいいかまで落とし込んでください。"
+**AI Response**: "Updated `aws-console-cicd-setup.md` to use the requested IAM role name and expanded section 3-2 into per-service Visual editor access-level selections. Also corrected the Secrets Manager procedure to align with the current Terraform behavior, where the secret resource is created by Terraform and the secret value is set after deploy."
+**Context**: CONSTRUCTION - Build and Test documentation refinement
+
+---
+## Visual Editor Action Selection Detail Expansion
+**Timestamp**: 2026-05-11T00:45:00+09:00
+**User Input**: "3-2について、以下を例にカテゴリから何を選べ毎いのかまで落とし込んでください。"
+**AI Response**: "Expanded section 3-2 of `aws-console-cicd-setup.md` to the AWS Console Visual editor level, including whether to use `All ... actions` for each access-level category or to select individual actions, with S3 called out as an individually scoped service and the other services documented with a pragmatic MVP selection strategy."
+**Context**: CONSTRUCTION - Build and Test documentation refinement
+
+---
+## Deploy Steps Clarification Request
+**Timestamp**: 2026-05-11T00:55:00+09:00
+**User Input**: "7についてはSlackのSecret名ではなくWebhookURLを登録する感じでいきましょうか。 9からの手順がいまいちわかりません。"
+**AI Response**: "Clarified that the secret value should be the Slack webhook URL, while the variable stores the secret name, and explained the deployment flow from artifact packaging through S3 upload and manual GitHub Actions dispatch in concrete terms for the current repository structure."
+**Context**: CONSTRUCTION - Build and Test documentation clarification
+
+---
+## Lambda Artifact Packaging Request
+**Timestamp**: 2026-05-11T01:05:00+09:00
+**User Input**: "3, について実行いただけますか？ Zip作成まで実施して配置してください。私のほうでアップロードしておきます。 アップロード後Zipが不要なのであれば削除すべきかも教えて。"
+**AI Response**: "Built `backend/infrastructure-support`, created a deployment ZIP at `backend/infrastructure-support/artifacts/infrastructure-support.zip`, and clarified that the same ZIP can be uploaded once and referenced by both Lambda artifact keys. Also clarified that the local ZIP can be deleted after upload if it is no longer needed."
+**Context**: CONSTRUCTION - Deployment artifact preparation
+
+---
+## Artifact Deployment Strategy Clarification
+**Timestamp**: 2026-05-12T09:10:00+09:00
+**User Input**: "一旦手動でZIPを配置したのですがそれでも失敗しているようで原因はわかりますか？ また、一旦手動で配置して通した後CI.CDを整備すべきか、現時点で整備すべきかどっち？"
+**AI Response**: "Inspected the local deployment artifact and confirmed that the ZIP structure matches the current Terraform handler paths. Clarified that an S3 `NoSuchKey` failure after manual upload most likely means the uploaded S3 object key does not exactly match the workflow input values, and recommended getting one manual artifact-upload/deploy path green before automating packaging and upload in CI/CD."
+**Context**: CONSTRUCTION - Deployment troubleshooting and CI/CD sequencing
 
 ---
