@@ -56,4 +56,4 @@ The next active stage is:
 - Revised unit design artifacts for `Infrastructure and Operational Support`
 - Revised code generation plan for that unit
 - New implementation slices for the remaining units
-- Codex automation plan and automation configuration for drift monitoring
+- Codex-side automation plan and automation configuration for drift monitoring (external to product implementation)

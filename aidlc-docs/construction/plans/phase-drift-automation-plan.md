@@ -3,6 +3,11 @@
 ## Purpose
 Add a Codex-side recurring automation loop that detects drift between approved phase artifacts and the actual repository state, then registers GitHub issues automatically.
 
+## Boundary
+- This automation is external to the application implementation tracked by AI-DLC.
+- It is not part of any product unit's Functional Design, Infrastructure Design, or Code Generation scope.
+- AI-DLC artifacts define only the operating policy for this automation; creation and execution happen on the Codex side.
+
 ## Drift Monitoring Scope
 
 ### Inception Drift Checks

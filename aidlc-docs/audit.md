@@ -1755,3 +1755,19 @@ Inceptionを完了させてください。READMEもInception完了に併せ更�
 **Context**: CONSTRUCTION - Functional Design restart approval gate
 
 ---
+
+## Codex Automation Boundary Decision
+**Timestamp**: 2026-05-12T22:36:05+09:00
+**User Input**: "> AI-DLC の成果物としては設計と運用方針だけ残し、実装対象は Codex automation 側に寄せます。\nそうしましょう。Ai-DLC側のタスクではないと思いますので。\nドキュメント修正後、Codex側でAutomationを作成してください。"
+**AI Response**: "Updated the restarted Functional Design artifacts to remove phase-drift monitoring as an application responsibility, kept drift monitoring only as a Codex-side operating policy in the restart plans, and proceeded to create a Codex automation for recurring phase-drift detection and GitHub issue registration."
+**Context**: CONSTRUCTION - Functional Design documentation correction and Codex automation creation
+
+---
+
+## Codex Automation Created
+**Timestamp**: 2026-05-12T22:36:05+09:00
+**User Input**: ""
+**AI Response**: "Created a cron automation named `AI-DLC phase drift monitor` with automation id `ai-dlc-phase-drift-monitor`. The automation runs daily at 10:00, audits AI-DLC phase drift for this repository, and opens or updates GitHub issues for new `Blocking` or `Material` drift."
+**Context**: CONSTRUCTION - External Codex automation registration
+
+---
