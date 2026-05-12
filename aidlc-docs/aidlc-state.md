@@ -11,9 +11,9 @@
 - **Stages to Skip**: Reverse Engineering (greenfield project)
 
 ## Workspace State
-- **Existing Code**: No
+- **Existing Code**: Yes
 - **Reverse Engineering Needed**: No
-- **Workspace Root**: C:\Users\user\OneDrive\Desktop\001_Project\aws-aidlc-daimonji
+- **Workspace Root**: /home/user/workspace/aws-aidlc-daimonji
 
 ## Code Location Rules
 - **Application Code**: Workspace root (NEVER in aidlc-docs/)
@@ -38,7 +38,7 @@
 
 ### CONSTRUCTION PHASE
 - [x] Functional Design
-- [ ] NFR Requirements
+- [x] NFR Requirements
 - [ ] NFR Design
 - [ ] Infrastructure Design
 - [ ] Code Generation
@@ -49,7 +49,7 @@
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: NFR Requirements
+- **Current Stage**: NFR Design
 - **Current Unit**: Infrastructure and Operational Support
-- **Next Stage**: NFR Requirements review approval or NFR Design restart for Infrastructure and Operational Support
-- **Status**: Restarted NFR Requirements artifacts generated for Infrastructure and Operational Support; awaiting user review before continuing Construction restart.
+- **Next Stage**: NFR Design review approval or Infrastructure Design restart for Infrastructure and Operational Support
+- **Status**: Restarted NFR Requirements approved for Infrastructure and Operational Support; NFR Design artifacts are the active review set before continuing the Construction restart.
