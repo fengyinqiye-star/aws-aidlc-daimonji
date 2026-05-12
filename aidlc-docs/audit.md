@@ -1771,3 +1771,27 @@ Inceptionを完了させてください。READMEもInception完了に併せ更�
 **Context**: CONSTRUCTION - External Codex automation registration
 
 ---
+
+## Functional Design Restart Approval
+**Timestamp**: 2026-05-12T22:44:54+09:00
+**User Input**: "承認します。問題なければAI-DLCを次のステップに進めてください。"
+**AI Response**: "Treated the message as approval of the restarted Functional Design for `Infrastructure and Operational Support`, marked the stage complete in `aidlc-state.md`, and advanced Construction to restarted NFR Requirements."
+**Context**: CONSTRUCTION - Functional Design restart approval and stage transition
+
+---
+
+## NFR Requirements Restart Plan Prompt
+**Timestamp**: 2026-05-12T22:44:54+09:00
+**User Input**: ""
+**AI Response**: "Created `aidlc-docs/construction/plans/infrastructure-and-operational-support-nfr-requirements-restart-plan.md` with restart-specific clarification questions covering Bedrock-aware load assumptions, latency targets, availability strategy, sensitive logging policy, task-level monitoring, Frontend-facing API contract scope, and TypeScript property-based testing framework selection."
+**Context**: CONSTRUCTION - NFR Requirements restart planning gate
+
+---
+
+## NFR Requirements Restart Answers Intake
+**Timestamp**: 2026-05-12T22:51:02+09:00
+**User Input**: "[infrastructure-and-operational-support-nfr-requirements-restart-plan.md](aidlc-docs/construction/plans/infrastructure-and-operational-support-nfr-requirements-restart-plan.md) \n質問に回答したので確認してください。"
+**AI Response**: "Validated the restart answers for NFR Requirements, interpreted `Q1` answer `3` as the `3〜5件程度` load assumption, and regenerated the restarted `nfr-requirements.md` and `tech-stack-decisions.md` for `Infrastructure and Operational Support`."
+**Context**: CONSTRUCTION - NFR Requirements restart generation
+
+---
