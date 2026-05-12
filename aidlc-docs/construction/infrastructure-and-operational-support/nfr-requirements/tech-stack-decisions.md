@@ -1,7 +1,7 @@
 # Infrastructure and Operational Support Tech Stack Decisions
 
 ## 決定サマリー
-この Unit の restarted NFR に基づき、MVP では AWS マネージドサービス中心の単一リージョン構成を採用する。重点は、Step Functions によるタスク分解、Bedrock AgentCore Runtime の組み込み、task 単位監視、機微情報保護、TypeScript 向け PBT 基盤である。
+この Unit の restarted NFR に基づき、MVP では AWS マネージドサービス中心の単一リージョン構成を採用する。重点は、Step Functions によるタスク分解、Bedrock AgentCore Runtime の組み込み、task 単位監視、機微情報保護、そして TypeScript 向けのテスト実行基盤と Property-Based Testing 基盤の明確化である。
 
 ## 1. オーケストレーション
 
@@ -92,20 +92,39 @@
 - Amplify Hosting の詳細 IaC
 - frontend 側のビルド/デプロイ設定
 
-## 9. TypeScript 向け PBT framework
+## 9. TypeScript テスト基盤
+
+### `Vitest`
+- 継続採用とする
+- 役割:
+  - TypeScript 実装の unit / integration test runner
+  - `describe` / `it` / `expect` / mock / project 分離などの実行基盤
+  - CI での test 実行入口
+- 理由:
+  - 現在の backend 実装がすでに `Vitest` を test runner として利用している
+  - 既存の example-based test をそのまま維持できる
+  - `fast-check` と自然に組み合わせられる
+
+## 10. TypeScript 向け PBT framework
 
 ### `fast-check`
-- 正式採用候補ではなく、正式採用とする
+- 正式採用とする
+- 役割:
+  - Property-Based Testing 用の入力生成
+  - shrinking
+  - seed-based reproducibility
+  - `Vitest` 上で実行される PBT assertion library
 - 理由:
   - TypeScript / JavaScript で成熟している
   - custom generator、shrinking、seed-based reproducibility を満たす
-  - 既存 test runner との統合がしやすい
+  - 既存 test runner と統合しやすい
 
 ### 運用方針
-- Code Generation で `fast-check` を dependency として追加する
+- 既存の example-based test は `Vitest` で維持する
+- Code Generation では `Vitest + fast-check` 併用を前提に test を生成する
 - CI では seed 再現性を担保できる形で実行方針を定義する
 
-## 10. 今回見送るもの
+## 11. 今回見送るもの
 
 ### `AWS X-Ray` / 詳細分散トレーシング
 - 今回は見送る
@@ -126,8 +145,10 @@
 
 ## PBT-09 対応メモ
 - 適用言語: TypeScript
+- test runner: `Vitest`
 - 選定 framework: `fast-check`
 - Code Generation で追加予定 dependency:
+  - `vitest`
   - `fast-check`
 - 満たすべき要件:
   - custom generators

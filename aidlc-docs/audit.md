@@ -1706,6 +1706,14 @@ Inceptionを完了させてください。READMEもInception完了に併せ更�
 
 ---
 
+## NFR Tech Stack Clarification Request
+**Timestamp**: 2026-05-12T22:59:10+09:00
+**User Input**: "ドキュメント( [tech-stack-decisions.md](aidlc-docs/construction/infrastructure-and-operational-support/nfr-requirements/tech-stack-decisions.md) )にVitest記載されていますでしょうか。されていなければ記載すべきか判断の上対応してください。"
+**AI Response**: "Confirmed that `tech-stack-decisions.md` documented `fast-check` but not `Vitest`. Rewrote the document in clean UTF-8 and explicitly positioned `Vitest` as the TypeScript test runner, while keeping `fast-check` as the property-based testing library used on top of it."
+**Context**: CONSTRUCTION - NFR Requirements documentation refinement
+
+---
+
 ## Construction Restart Request
 **Timestamp**: 2026-05-12T10:25:00+09:00
 **User Input**: "ここまででInfraデプロイまではできたと思っておりますが、InceptionフェーズからConstructionフェーズまででズレがあります。
