@@ -83,6 +83,69 @@ All subsequent rule detail file references (e.g., `common/process-overview.md`, 
 
 ---
 
+## NFR Design Rebaseline Request
+**Timestamp**: 2026-05-13T00:32:00+09:00
+**User Input**: "NFRのdesignはrequirementベースで記載されていますか。要はこのConstructionは再実行しているため、再実行前のdesignベースではなく、再実行後のrequirementベースでdesignを進めてほしい。"
+**AI Response**: "Reviewed the current NFR design artifacts against the restarted NFR requirements, determined that the existing design only partially reflected the restart baseline, and started regenerating the NFR design artifacts so they explicitly trace back to the restarted requirements."
+**Context**: CONSTRUCTION - NFR Design rebaseline on restarted requirements
+
+---
+
+## Restarted NFR Requirements Approval and NFR Design Start
+**Timestamp**: 2026-05-13T00:24:00+09:00
+**User Input**: "Continue to Next Stage - Approve NFR requirements and proceed to NFR Design"
+**AI Response**: "Treated the message as approval of the restarted NFR Requirements for `Infrastructure and Operational Support`, updated the workflow state to `NFR Design`, and activated the existing NFR Design plan and artifacts as the next review set for the restart path."
+**Context**: CONSTRUCTION - restarted NFR Requirements approval and transition to NFR Design
+
+---
+
+## Restart Resume State Correction
+**Timestamp**: 2026-05-13T00:15:00+09:00
+**User Input**: "前提:
+- リポジトリは `aws-aidlc-daimonji`
+- 現在のブランチは `construction`
+- AI-DLC は Inception 完了済み
+- Construction は一度進めたが、Inception との差分が見つかったため「最初から再実行」している
+- 再実行の主な理由:
+  - Bedrock が未反映
+  - Amplify Hosting / frontend が未実装
+  - Step Functions の分解が粗く、Lambda が2本だけでオーケストレーション粒度が不足していた
+- そのため Construction は restart 扱いで進めている
+
+現在のAI-DLCステータス:
+- `aidlc-docs/aidlc-state.md` を基準に再開する
+- 現在ステージは
+  `CONSTRUCTION - NFR Requirements (Infrastructure and Operational Support / Review)`
+- restarted Functional Design は承認済み
+- restarted NFR Requirements は生成済みで、まだレビュー承認前の扱い
+- 対象 Unit は
+  `Infrastructure and Operational Support`
+
+確認してほしい主要ファイル:
+- `aidlc-docs/aidlc-state.md`
+- `aidlc-docs/audit.md`
+- `aidlc-docs/construction/plans/construction-restart-gap-analysis.md`
+- `aidlc-docs/construction/plans/construction-restart-plan.md`
+- `aidlc-docs/construction/plans/infrastructure-and-operational-support-functional-design-restart-plan.md`
+- `aidlc-docs/construction/infrastructure-and-operational-support/functional-design/business-logic-model.md`
+- `aidlc-docs/construction/infrastructure-and-operational-support/functional-design/business-rules.md`
+- `aidlc-docs/construction/infrastructure-and-operational-support/functional-design/domain-entities.md`
+- `aidlc-docs/construction/plans/infrastructure-and-operational-support-nfr-requirements-restart-plan.md`
+- `aidlc-docs/construction/infrastructure-and-operational-support/nfr-requirements/nfr-requirements.md`
+- `aidlc-docs/construction/infrastructure-and-operational-support/nfr-requirements/tech-stack-decisions.md`
+
+補足:
+- Codex 側の外付け automation として phase drift monitor は作成済み
+- これはアプリ実装対象ではなく、運用補助
+- WSL 側では `node`, `npm`, `terraform` 導入済み
+- `/home/user/workspace/aws-aidlc-daimonji` で作業継続すること
+
+まずは `aidlc-state.md` と上記 restarted Construction 関連ファイルを確認し、現在地を要約した上で次の AI-DLC ステップを続行してください。"
+**AI Response**: "Reviewed the requested restart artifacts, found that `aidlc-state.md` had drifted ahead of the intended restart checkpoint, and corrected the active restart status back to `CONSTRUCTION - NFR Requirements (Infrastructure and Operational Support / Review)` so the workflow can resume from the proper approval gate."
+**Context**: CONSTRUCTION - restart resumption and state reconciliation
+
+---
+
 ## Code Generation Stepwise Implementation
 **Timestamp**: 2026-05-10T20:27:41+09:00
 **User Input**: "承認します。実装へ移り、Step毎にCommitを行ってください。"
