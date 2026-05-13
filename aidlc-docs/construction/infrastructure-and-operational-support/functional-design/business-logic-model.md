@@ -1,97 +1,161 @@
 # Infrastructure and Operational Support Business Logic Model
 
 ## 目的
-この Unit は、休暇交渉リクエスト全体の進行管理を担う。主な責務は以下の 5 つである。
+この Unit は、休暇交渉 MVP のワークフロー制御と実行基盤の責務を定義する。
+再始動後の Functional Design では、Inception で承認済みの以下を満たすことを目的とする。
 
-- リクエスト受付後のワークフロー開始
-- 交渉中の状態遷移とイベント記録
-- 必要時の弁護士エージェント参加フロー起動
-- 交渉成立後の Google Calendar 登録確認フロー起動
-- 一時障害と業務判断失敗を分離した失敗制御
+- Step Functions を FR-09 相当の論理ステップで分解する
+- Bedrock AgentCore Runtime 上の交渉オーケストレータ Agent と弁護士 Agent の実行境界を定義する
+- API / frontend / workflow / adapter の責務境界を明確にする
+- タスク単位で失敗箇所が追跡できる構成にする
+- 後続の Frontend Unit が Amplify Hosting から利用する公開 API 契約を定義する
+
+## 論理コンポーネント
+
+### 1. Public Entry Gateway
+- フロントエンドまたは将来のクライアントからの HTTP リクエストを受け付ける
+- `POST /requests` と `GET /requests/{requestId}` を公開 API とする
+- Frontend Unit へは Amplify Hosting から参照される前提の API 境界を提供する
+
+### 2. Workflow Entry Lambda
+- Public Entry Gateway からの入力を受け、初期 `Request` を作成する
+- Step Functions 開始に必要な最小 payload を構成する
+- 長時間処理や交渉判断は持たず、ワークフロー開始の責務に限定する
+
+### 3. Workflow State Coordinator
+- FR-09 に沿った粒度で Step Functions の状態遷移を制御する
+- 分岐、再試行、待機、失敗終端を管理する
+- task Lambda と Agent Runtime を呼び分け、実行順序を保証する
+
+### 4. Task Lambda Layer
+- 各論理ステップを個別の task Lambda として実行する
+- 失敗時にどのステップで問題が起きたかを Step Functions 上で即座に識別できるようにする
+- 最低限の logical task は次とする
+  - `ExtractVacationIntentTask`
+  - `CheckMissingInformationTask`
+  - `LoadGoogleCalendarTask`
+  - `LoadTeamScheduleTask`
+  - `CalculateVacationScoreTask`
+  - `GenerateNegotiationPlanTask`
+  - `GenerateSlackMessageTask`
+  - `PostToSlackTask`
+  - `RegisterCalendarLeaveTask`
+  - `UpdateStatusTask`
+  - `ErrorHandlerTask`
+
+### 5. Negotiation Orchestrator Agent Runtime
+- Bedrock AgentCore Runtime 上で交渉オーケストレータ Agent を実行する
+- 休暇交渉判断、理由整理、モード別方針の生成を担う
+- Step Functions から必要な場面でのみ呼び出される
+
+### 6. Lawyer Agent Runtime
+- Bedrock AgentCore Runtime 上で弁護士 Agent を実行する
+- `絶対休めるモード` で必要になった場合のみ参加する
+- 法務観点の助言と文面方針の補強を行う
+
+### 7. Request Tracking Backbone
+- 現在状態、イベントログ、ステップ実行結果を一貫して保持する
+- Frontend、Chat Intake、Negotiation、Calendar Registration の各 Unit が参照できるようにする
 
 ## オーケストレーション原則
-- Step Functions は状態遷移、待機、分岐、再試行、タイムアウト制御を担当する。
-- 各アプリケーションサービスは、交渉分析、メッセージ生成、Slack 送信、Calendar 登録などの業務処理を担当する。
-- Request Tracking は、現在状態とイベント履歴の単一参照元として扱う。
-- UI には状態そのものと必要な説明を返し、詳細履歴はイベントログとして保持する。
+- Step Functions は「状態遷移」「分岐」「待機」「再試行」を担う
+- task Lambda は「個別ステップ処理」を担う
+- Agent Runtime は Bedrock AgentCore Runtime に配置し、Step Functions から必要時にのみ呼び出す
+- API entry Lambda と task Lambda は明確に分離する
+- 読み取り API は write ワークフローから独立した軽量経路で提供する
 
-## MVP 状態モデル
-MVP の主要状態は以下とする。
+## ワークフロー状態モデル
 
-1. `受付`
-2. `交渉中`
-3. `要エスカレーション`
-4. `成立`
-5. `不成立`
-6. `登録失敗`
+### 主状態
+1. `DRAFT`
+2. `COLLECTING_INFO`
+3. `ANALYZING`
+4. `REVIEW_REQUIRED`
+5. `NEGOTIATING`
+6. `ESCALATED`
+7. `APPROVED`
+8. `NEEDS_REPLAN`
+9. `FAILED`
+
+### 状態モデルの考え方
+- Inception の FR-08 に合わせ、UI 表示と workflow control の双方に使える主状態を採用する
+- Step Functions の中間的な task 失敗や待機は、主状態ではなく execution / event log で表現する
+- 休暇取得成功と Calendar 登録成功がそろった時点を完了条件とする
+
+## FR-09 対応ワークフロー
+
+### フロー 1: Request 受付
+1. `ReceiveChatMessage`
+2. `ExtractVacationIntent`
+3. `CheckMissingInformation`
+4. 情報不足なら `COLLECTING_INFO` に遷移して再入力待ち
+5. 情報充足なら `ANALYZING` に遷移
+
+### フロー 2: 事前分析
+1. `LoadGoogleCalendar`
+2. `LoadTeamSchedule`
+3. `CalculateVacationScore`
+4. `GenerateNegotiationPlan`
 
 補足:
-- 主要状態は最小限に保つ。
-- `Slack送信済み` や `返信待ち` などの詳細はイベントログ側で管理する。
-- UI や後続 Unit は、主要状態とイベントログの組み合わせで詳細表示を構成する。
+- スコアは内部利用のみであり、UI 表示対象ではない
 
-## 主要フロー
+### フロー 3: Slack 送信準備
+1. `GenerateSlackMessage`
+2. `UpdateStatus(REVIEW_REQUIRED)`
+3. `WaitForUserReview`
+4. 承認後に `PostToSlack`
+5. `UpdateStatus(NEGOTIATING)`
 
-### 1. リクエスト受付フロー
-1. Chat Intake / Tracking Unit から依頼内容、モード、希望日、ユーザー情報を受け取る。
-2. Request を `受付` で登録する。
-3. ワークフローを起動し、初回イベントを記録する。
-4. 状態を `交渉中` に更新し、交渉フローへ移る。
+### フロー 4: 交渉継続とエスカレーション
+1. 新しい交渉ログ到着時に `GenerateNegotiationPlan` を再評価する
+2. `絶対休めるモード` で必要な場合に Negotiation Orchestrator Agent が弁護士 Agent 参加を要求する
+3. Workflow State Coordinator が `ESCALATED` を記録し、Lawyer Agent Runtime を呼び出す
+4. 最終方針が確定するまで交渉を継続する
 
-### 2. 交渉継続フロー
-1. Negotiation Unit が Slack 交渉文面を生成し、Slack に送る。
-2. 返信や交渉ログが到着するたびにイベントを追記する。
-3. `絶対休めるモード` では、AI が交渉ログを都度評価する。
-4. エスカレーションが必要と判断された時点で、状態を `要エスカレーション` に更新する。
-5. Escalation Unit を呼び出し、同一スレッドへ弁護士エージェントを参加させる。
-6. エスカレーション後もワークフロー自体は継続し、以後の交渉結果を追跡する。
+### フロー 5: 成功処理
+1. 休暇交渉成立時に `UpdateStatus(APPROVED)`
+2. `RegisterCalendarLeave`
+3. 登録成功で完了
+4. 登録失敗時は `ErrorHandler` と `UpdateStatus(FAILED)` を実行
 
-### 3. 交渉結果確定フロー
-1. 交渉成功時は状態を `成立` に更新する。
-2. `できれば休みたいモード` で不成立なら状態を `不成立` に更新する。
-3. 交渉成功時のみ Calendar 登録確認フローへ進む。
+## 失敗モデル
 
-### 4. Calendar 登録確認フロー
-1. 交渉成立直後に、ユーザーへ最終確認を返す。
-2. ユーザー承認後に Calendar Registration Unit を起動する。
-3. 登録成功なら `成立` を維持し、登録結果イベントを追記する。
-4. 登録失敗なら状態を `登録失敗` に更新し、UI に再試行可能な失敗として返す。
+### 失敗カテゴリ
+- `TransientFailure`
+- `BusinessFailure`
+- `IntegrationFailure`
+- `AgentRuntimeFailure`
+- `FatalFailure`
 
-### 5. 失敗制御フロー
-1. 失敗が発生したら、まず一時障害か業務判断失敗かを分類する。
-2. 一時障害は再試行ポリシーに従って自動再試行する。
-3. 自動再試行上限後も失敗した場合は FATAL とする。
-4. FATAL は UI 上で明示し、ユーザーが手戻り判断できるようにする。
-5. 業務判断失敗は再試行せず、説明付きで UI に返す。
+### 失敗処理方針
+- `TransientFailure` は Step Functions Retry / Backoff の対象とする
+- `BusinessFailure` は追加確認または UI への説明へ送る
+- `IntegrationFailure` は adapter 障害として扱い、復旧可能性を評価する
+- `AgentRuntimeFailure` は Bedrock 実行失敗として扱い、代替テンプレートまたは人間レビューへフォールバックする
+- `FatalFailure` は execution を終了し、次回 task と再開手順を表示する
 
-## エスカレーション判定モデル
-- 対象: `絶対休めるモード`
-- 判定主体: AI
-- 判定タイミング: 新しい交渉ログ受信時ごと
-- 判定入力:
-  - 直近の返信内容
-  - 過去の交渉履歴
-  - 拒否理由や法的懸念を含む表現
-  - 現在の交渉方針
-- 判定結果:
-  - `継続`
-  - `要エスカレーション`
+## Amplify Hosting との論理接続
+- Amplify Hosting の詳細なリソース定義は Frontend Unit へ委ねる
+- ただし本 Unit は、Frontend が参照すべき API 契約を先に固定する
+  - 公開 API Base URL
+  - 読み取り用 request status endpoint
+  - workflow 開始 endpoint
+  - 必要な runtime environment variable 一覧
 
-## イベントログ方針
-イベントログには以下を格納する。
+## Testable Properties
 
-- 状態遷移
-- 交渉メッセージ履歴
-- エスカレーション理由
-- Calendar 登録結果
-- 内部プロンプト要約
-- モデル判断理由
-- 再試行履歴
+### PBT-01 対応
+- **Workflow state transitions**
+  - Category: `Invariant`
+  - Property: 許可された主状態遷移のみが発生する
+- **Retry scheduling**
+  - Category: `Idempotence`
+  - Property: 同一 retry exhaustion 判定を再適用しても failure state は変化しない
+- **Request / event projection**
+  - Category: `Round-trip`
+  - Property: event log から再構成される state projection を serialize / deserialize しても意味が保持される
 
-生の外部 API レスポンス本文は MVP の必須保持対象にはしない。
-
-## 後続 Unit への引き渡し
-- Backend Chat Intake and Tracking Unit は Request 初期化と UI 表示の参照元としてこの状態モデルを利用する。
-- Backend Negotiation and Escalation Unit は交渉継続、判定、同一スレッド参加の起動条件をこのモデルに従って実装する。
-- Calendar Registration Unit は最終確認後にのみ起動される前提で実装する。
-- Frontend Unit は主要状態とイベントログ要約を使って Request Detail を構成する。
+### PBT 適用境界
+- Bedrock AgentCore Runtime 自体の推論品質はこの段階の property test 対象ではない
+- 機械的に検証できる workflow / state / projection を中心に扱う

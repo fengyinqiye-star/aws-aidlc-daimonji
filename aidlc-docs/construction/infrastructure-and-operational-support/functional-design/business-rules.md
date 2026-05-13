@@ -1,52 +1,70 @@
 # Infrastructure and Operational Support Business Rules
 
-## 1. 状態遷移ルール
-- 新規 Request は必ず `受付` から開始する。
-- ワークフロー開始後は `交渉中` に遷移する。
-- `絶対休めるモード` で AI が必要と判断した場合のみ `要エスカレーション` に遷移する。
-- 交渉成立時は `成立` に遷移する。
-- 交渉不成立時は `不成立` に遷移する。
-- Calendar 登録が最終確認後に失敗した場合のみ `登録失敗` に遷移する。
+## 1. ワークフロー開始ルール
+- 新規 request は必ず `ReceiveChatMessage` から開始する
+- API entry Lambda は state machine 開始までのみを担い、交渉判断や長時間処理は担わない
+- request 受付時には初期 `Request` と初期 `RequestEvent` を必ず記録する
 
-## 2. モード別ルール
-- `絶対休めるモード` は有休取得成立を最優先とする。
-- `絶対休めるモード` では AI が交渉ログを都度評価し、必要に応じて弁護士エージェントへ即時エスカレーションする。
-- `できれば休みたいモード` では自動エスカレーションしない。
-- `できれば休みたいモード` で不成立となった場合は、率直なフィードバックをそのまま返す。
+## 2. 状態遷移ルール
+- `DRAFT` から直接 `NEGOTIATING` へ遷移してはならない
+- 情報不足時のみ `COLLECTING_INFO` を使用する
+- 分析完了後は `ANALYZING` から `REVIEW_REQUIRED` または `NEGOTIATING` に遷移する
+- 人間レビューが必要な request では、Slack 送信前に必ず `REVIEW_REQUIRED` を経由する
+- 休暇交渉成立時のみ `APPROVED` に遷移できる
+- `FAILED` は workflow 失敗または Calendar 登録失敗を含む終端状態とする
 
-## 3. エスカレーションルール
-- エスカレーション判定は新規返信または交渉文脈更新ごとに実施する。
-- エスカレーション判定の結果が `要エスカレーション` になった場合、同一 Slack スレッドに弁護士エージェントを参加させる。
-- エスカレーション後も Request は同一 ID、同一スレッド、同一履歴で継続管理する。
-- エスカレーション理由は必ずイベントログに記録する。
+## 3. Step Functions タスク分解ルール
+- State Machine は FR-09 の論理ステップに沿った粒度で task を分解する
+- ひとつの task に複数の主要責務を詰め込まない
+- task 名だけで失敗箇所が識別できること
+- すべての task 実行結果は requestId と taskName が追跡できる形で記録する
 
-## 4. Calendar 登録ルール
-- Google Calendar 登録は交渉成立後にのみ許可される。
-- Google Calendar 登録前には必ずユーザーへ最終確認を出す。
-- ユーザー承認が得られるまで Calendar Registration Unit を起動してはならない。
-- Calendar 登録結果は成功・失敗を問わずイベントログへ記録する。
+## 4. Agent Runtime ルール
+- Negotiation Orchestrator Agent は交渉方針と理由整理を担う
+- Lawyer Agent は `絶対休めるモード` で必要になった場合のみ参加する
+- Agent Runtime 呼び出しは Step Functions から task 境界として行う
+- Lawyer Agent の参加判定は request 状態、交渉ログ、現在方針に基づく
+- Lawyer Agent 参加後も同一 requestId と同一 Slack thread ref を維持する
 
-## 5. 再試行ルール
-- 一時障害と判断された失敗のみ自動再試行対象とする。
-- 業務判断失敗は自動再試行しない。
-- 一時障害の再試行上限を超えた場合は FATAL とする。
-- FATAL は UI に明示し、ユーザーが次の対応を判断できるようにする。
-- 再試行の回数、対象処理、結果はすべてイベントログに記録する。
+## 5. モード別ルール
+- `must-succeed` の request は、必要に応じて Lawyer Agent 参加を許可できる
+- `best-effort` の request は、原則として Lawyer Agent 参加へ進めない
+- `best-effort` で休暇取得不成立となった場合は、率直なフィードバックをそのまま返し、追加交渉フローへ遷移しない
 
-## 6. イベント記録ルール
-- 主要状態の変更時には必ずイベントを記録する。
-- Slack 交渉メッセージの送受信は要約または本文参照可能な形で記録する。
-- 内部プロンプトは生全文ではなく要約を記録する。
-- モデル判断理由は監査可能な粒度で記録する。
-- 外部 API の生レスポンス本文は MVP の必須記録対象としない。
+## 6. Review / Slack ルール
+- 初回投稿前の Slack メッセージは必ず review 承認を受ける
+- 未承認状態で `PostToSlackTask` を実行してはならない
+- Slack 投稿失敗時は `IntegrationFailure` として扱い、再試行方針を決定する
 
-## 7. 一貫性ルール
-- Request の現在状態は常に単一値で管理する。
-- 詳細進行はイベントログで補完し、主要状態を細分化しすぎない。
-- 同じ Request に対する UI 表示、交渉制御、Calendar 登録制御は同じ状態ソースを参照する。
+## 7. Calendar 登録ルール
+- `RegisterCalendarLeaveTask` は `APPROVED` request に対してのみ実行可能とする
+- 登録前にはユーザー確認が完了していなければならない
+- 登録失敗時は `FAILED` と event log で結果を記録する
 
-## 8. エラーハンドリングルール
-- ユーザー入力不足で開始できない場合はワークフローを開始しない。
-- オーケストレーション障害時は進行不能状態をイベントログへ記録する。
-- FATAL 障害時は復旧不能として扱うのではなく、MVP では「AI の自動処理継続不能」として扱う。
-- UI には障害種別と次の期待アクションを返す。
+## 8. Retry / Failure ルール
+- `TransientFailure` のみ自動再試行対象とする
+- `BusinessFailure` は自動再試行してはならない
+- `AgentRuntimeFailure` は Bedrock 障害として段階的にフォールバックする
+- 自動再試行回数超過後は `FatalFailure` に昇格する
+- `FatalFailure` 発生時は workflow 実行を終了し、復旧情報を返す
+
+## 9. Request Tracking ルール
+- 現在状態は単一の正とする
+- 詳細な進行情報は event log と task execution log に記録する
+- 読み取り API は現在状態と event log を組み合わせて返すが、内部 execution metadata を UI 表示用へそのまま露出しない
+
+## 10. Amplify / Frontend 契約ルール
+- Frontend Unit が未実装でも、Amplify 側から必要となる API 境界と environment variable 名は本 Unit で定義する
+- Amplify 自体の詳細 IaC は Frontend Unit 側へ委ねるが、接続前提は後続 Unit が参照できるように保持する
+
+## 11. Testable Properties
+
+### Invariant
+- 許可された状態遷移のみが発生する
+- review 未承認の request では `PostToSlackTask` に遷移しない
+
+### Idempotence
+- 同一 failure classification を再評価しても最終 failure category は変化しない
+
+### Round-trip
+- Request 状態と event log の投影結果は serialize / deserialize 後も意味を保持する

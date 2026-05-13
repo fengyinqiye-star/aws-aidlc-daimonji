@@ -1,107 +1,153 @@
 # Infrastructure and Operational Support NFR 設計パターン
 
 ## 概要
-本書は `Infrastructure and Operational Support` Unit に対して、非機能要件を満たすために採用する設計パターンを整理する。対象は、ワークフロー耐障害性、状態整合性、通知方式、公開入口境界、および可観測性の構成方針である。
+本書は、restart 後の `Infrastructure and Operational Support` Unit に対する NFR 設計パターンを定義する。設計の基準は、再実行前の Construction artifact ではなく、`aidlc-docs/construction/infrastructure-and-operational-support/nfr-requirements/nfr-requirements.md` に記載された restarted NFR Requirements である。
 
-## 1. レジリエンスパターン
+## 1. requirement から design への対応
 
-### Step Functions 主導の Retry / Backoff
-- 一時障害への再試行は、`Step Functions` の標準 `Retry` / `Backoff` を中心に構成する。
-- `Lambda` 側は極力シンプルに保ち、関数内部で独自の複雑な再試行ループを持たせない。
+### スケーラビリティ要件 -> 独立した伸縮境界
+- restarted NFR では、単一リージョン MVP を前提にしつつ、オーケストレーション、task 実行、状態保存、Bedrock 呼び出しが個別に伸縮できる構造を求めている。
+- このため設計上は、以下の境界を論理的に分離する。
+  - 公開 API 入口境界
+  - workflow 制御境界
+  - task 実行境界
+  - request 現在状態保持境界
+  - event log 保持境界
+  - Bedrock AgentCore Runtime 呼び出し境界
 
-### 採用理由
-- 再試行責務をワークフロー層へ集約できる。
-- 再試行回数、待機時間、失敗遷移を状態機械として可視化できる。
-- 関数ごとの実装差分を減らし、後続 Unit の実装を単純化できる。
+### パフォーマンス要件 -> 高速受理 + 非同期進行
+- restarted NFR では、`POST /requests` と `GET /requests/{requestId}` を数秒以内で応答可能にし、長い推論処理を同期 API 応答に含めないことを求めている。
+- このため設計上は、以下を採用する。
+  - 受理後すぐに workflow を開始する高速受理パス
+  - 受理後の主要処理を非同期で進める workflow 進行
+  - 現在状態を即時参照する read パス
+  - 詳細確認時のみ event log を使う補助 read パス
 
-### 適用方針
-- Retry 対象は一時障害に限定する。
-- 業務判断失敗は Retry 対象に含めない。
-- 再試行上限超過時は `FATAL` 扱いへ遷移する。
+### 可用性 / 信頼性要件 -> 明示的障害分類 + 制限付き再試行
+- restarted NFR では、`TransientFailure` のみを自動再試行対象とし、`AgentRuntimeFailure` を独立分類し、retry exhaustion 後は明示的失敗に昇格させることを求めている。
+- このため設計上は、以下を採用する。
+  - workflow 主導の再試行制御
+  - 障害分類後に retry / 終端 / 人間レビュー fallback を決定するルーティング
+  - retry exhaustion 後の明示的な terminal state 遷移
 
-## 2. 失敗ルーティングパターン
+### セキュリティ要件 -> 最小露出 + secret 分離
+- restarted NFR では、交渉文面、法務助言、Slack thread 情報などの機微情報を最小露出で扱うことを求めている。
+- このため設計上は、以下を採用する。
+  - 構造化ログへの最小限メタデータ出力
+  - 通知資格情報を扱う専用 secret 境界
+  - 通知本文での機微情報抑制
+  - 本文そのものではなく参照や要約中心の運用
 
-### UI 優先の FATAL 表示
-- `FATAL` 障害時は、まず UI 側での明示表示を優先する。
-- Slack 通知はベストエフォートとし、通知失敗が UI 側の障害表示を妨げない構成にする。
+### 可観測性要件 -> task 単位の失敗局所化
+- restarted NFR では、workflow 全体よりも task 単位での失敗局所化を優先している。
+- このため設計上は、以下を採用する。
+  - task 単位の構造化ログ
+  - task 単位のメトリクス
+  - 高重要度障害だけを通知対象にする alarm / notification 方針
+  - request / workflow / task / retry の相関キー
 
-### 採用理由
-- MVP では、ユーザーまたはデモ実施者が失敗を即座に認識できることが最優先である。
-- 通知経路障害まで主フロー失敗へ波及させると、ユーザー向け説明責務が不明確になる。
+### Frontend 連携要件 -> 公開契約の固定
+- restarted NFR では、Frontend Unit 向けに API Base URL、主要 endpoint、必要 environment variable 名をこの unit 側で固定することを求めている。
+- このため設計上は、公開 API 契約を非機能境界として先に固定し、Amplify Hosting の詳細 IaC は後続 Unit に委ねる。
 
-### 適用方針
-- UI 表示用イベントと通知用イベントは同じ障害分類結果を参照する。
-- ただし通知失敗そのものは主ワークフロー失敗へ昇格させない。
+### PBT 要件 -> 決定的な projection / classification 境界
+- restarted NFR では、workflow state projection、retry / failure classification、request / event serialization、frontend runtime contract serialization に PBT を適用できるようにすることを求めている。
+- このため設計上は、隠れた状態遷移を避け、分類と projection の境界を決定的に保つ。
 
-## 3. 状態整合性パターン
+## 2. レジリエンス設計パターン
 
-### Current State + Event Log 併用
-- `Request` の現在状態は単一レコードで管理する。
-- `Event Log` は補助的な監査・追跡情報として保持する。
+### workflow 主導の retry / backoff
+- 再試行は task ごとの ad hoc 実装ではなく、workflow 制御側が一元管理する。
+- task handler は結果と障害分類を返し、再試行有無の最終判断は workflow 側が担う。
 
-### 採用理由
-- UI や後続 Unit は、現在状態を高速に参照できる必要がある。
-- 監査やトラブルシュートでは詳細イベント列が必要だが、参照の主軸をイベントソーシングに寄せすぎると MVP 実装が重くなる。
+### 障害分類後に回復方針を決定する
+- task の失敗はまず以下の分類へ正規化する。
+  - `TransientFailure`
+  - `BusinessFailure`
+  - `IntegrationFailure`
+  - `AgentRuntimeFailure`
+  - `FatalFailure`
+- その後に retry、明示的失敗、人間レビュー fallback のいずれへ進むかを決定する。
 
-### 適用方針
-- 状態更新時には、現在状態更新とイベント追加を同じ処理責務の中で実行する。
-- 読み取り系は基本的に現在状態を主軸にし、詳細が必要な時のみイベントログを参照する。
+### Bedrock 障害は人間レビュー fallback を持つ
+- Bedrock 関連障害は単なる generic failure に埋もれさせず、`AgentRuntimeFailure` として扱う。
+- そのうえで、bounded retry または人間レビュー fallback に接続する。
 
-## 4. 通知集約パターン
+## 3. パフォーマンス設計パターン
 
-### ワークフロー単位の通知集約
-- 高重要度障害の Slack 通知は、ワークフロー単位で 1 通に集約する。
-- 同一ワークフロー内で同種障害が連続しても、通知スパムを避ける。
+### 高速受理パターン
+- 公開 API 入口では、request 受理、初期 state 作成、workflow 開始に必要な最小処理だけを行う。
+- 長時間の Bedrock 推論や下流処理は同期応答の完了条件に含めない。
 
-### 採用理由
-- MVP 段階では、見逃し防止よりも運用ノイズ抑制の価値が高い。
-- デモや検証環境では、同一 Request で複数失敗が連鎖しやすく、逐次通知は扱いづらい。
+### read 最適化された current state
+- UI や後続 Unit の主要 read は current state を主参照にする。
+- event log は詳細追跡用であり、毎回の read の主経路には置かない。
 
-### 適用方針
-- 通知キーは少なくとも `requestId` または `workflowExecutionId` 単位で束ねる。
-- 集約後の通知には、最終状態、代表的失敗理由、再試行結果を含める。
+### Bedrock 遅延分離パターン
+- Bedrock 呼び出しは専用境界に分離し、一般 task の遅延と混ざらないようにする。
 
-## 5. 公開入口境界パターン
+## 4. 整合性 / 監査性設計パターン
 
-### API Gateway は公開入口専用
-- `API Gateway` を採用する場合、この Unit ではフロント向けの公開入口としてのみ扱う。
-- 内部コンポーネント間通信には利用しない。
+### current state + event history 併用
+- current state は UI と下流参照のための主 read model とする。
+- event history は監査、説明責任、トラブルシュートのための主 audit model とする。
+- 状態更新と event 追加は同一の business transition 責務として扱う。
 
-### 採用理由
-- API Gateway はクライアントとバックエンドの HTTP 境界を担う役割に限定するのが自然である。
-- 内部呼び出しまで API Gateway を経由させると、レイテンシ、責務、障害点が不要に増える。
+### 相関キー付き execution 記録
+- task 実行結果は以下の相関キーで追跡できるようにする。
+  - `requestId`
+  - `workflowExecutionId`
+  - `taskName`
+  - `failureCategory`
+  - `retryAttempt`
 
-### 適用方針
-- 公開リクエスト受理は `API Gateway -> Lambda -> Step Functions` を基本形とする。
-- 内部呼び出しは `Step Functions -> Lambda` またはアダプタ経由で完結させる。
+## 5. 通知設計パターン
 
-## 6. 可観測性パターン
+### UI 優先の terminal failure 可視化
+- ユーザー向けの terminal failure 表示は、外部通知送信成功に依存させない。
+- UI での失敗可視化と Slack 通知は別責務として扱う。
 
-### 構造化ログ + 高重要度通知
-- 可観測性は `CloudWatch Logs` を基盤にし、ログは構造化形式を前提とする。
-- 高重要度障害のみ Slack Webhook 通知を行う。
+### workflow 単位の高重要度通知集約
+- 外部通知は高重要度障害のみ対象とする。
+- 同一 workflow 内の重複通知は集約し、通知スパムを避ける。
+- 通知内容は raw payload ではなく要約中心とする。
 
-### 採用理由
-- 基本ログと軽量通知で MVP の運用性を十分に確保できる。
-- フルトレーシングを後回しにしても、構造化ログがあれば後続の改善余地を残せる。
+## 6. セキュリティ / データ露出パターン
 
-### 適用方針
-- ログには `requestId`、`workflowExecutionId`、`state`、`failureCategory`、`retryAttempt` などの相関キーを含める。
-- 通知はログの要約を転送する形にし、生ログ全文は通知しない。
+### 構造化ログ + payload 抑制
+- ログは state、分類、相関キーを中心に構造化する。
+- 交渉本文や法務文面などの機微本文はログに全文出力しない。
 
-## 7. パターン適用の優先順位
-1. UI での失敗可視化
-2. Step Functions 主導の再試行制御
-3. Request 現在状態の一貫性維持
-4. 通知ノイズ抑制
-5. API Gateway の公開入口限定
+### secret access 分離
+- 通知資格情報などの secret 取得は専用境界で扱う。
+- task 実装側が平文 secret を自由に扱わない構造にする。
 
-## 8. 拡張ルール適合性
+## 7. 公開契約設計パターン
+
+### 公開入口専用 gateway
+- gateway は frontend など外部クライアント向け入口としてのみ使う。
+- 内部 workflow / task 間通信を公開 API 境界に戻さない。
+
+### 契約先行の frontend 連携
+- Frontend Unit が実装される前に、接続前提の API 契約をこの unit で固定する。
+- Amplify Hosting の実体設計は後続 Unit に残すが、接続面はここで固定する。
+
+## 8. 後続 Construction への影響
+
+### Infrastructure Design への影響
+- infrastructure mapping は、ここで定義した境界を潰さないことが前提になる。
+- Bedrock 隔離境界と task 単位 observability は infrastructure mapping に残す必要がある。
+
+### Code Generation への影響
+- code generation では、決定的な state projection と failure classification を保つ必要がある。
+- PBT は `fast-check + Vitest` 前提で、この設計境界を対象に組み立てる。
+
+## 拡張ルール適用状況
 
 ### Security Baseline
 - 状態: N/A
-- 理由: `aidlc-state.md` で無効化されている。
+- 理由: `aidlc-state.md` で無効化されている
 
 ### Property-Based Testing
-- 状態: N/A
-- 理由: この段階は非機能パターン設計であり、PBT の具体適用は後続の設計またはテスト段階で扱う。
+- 状態: Compliant
+- 理由: restarted NFR で定義された PBT 適用対象に対して、決定的な分類 / projection / serialization 境界を保つ設計に更新した

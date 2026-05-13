@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-04T21:37:02+09:00
-- **Current Stage**: CONSTRUCTION - Build and Test (Infrastructure and Operational Support / Review)
+- **Current Stage**: CONSTRUCTION - Infrastructure Design (Infrastructure and Operational Support / Review)
 
 ## Execution Plan Summary
 - **Total Stages**: 10
@@ -11,9 +11,9 @@
 - **Stages to Skip**: Reverse Engineering (greenfield project)
 
 ## Workspace State
-- **Existing Code**: No
+- **Existing Code**: Yes
 - **Reverse Engineering Needed**: No
-- **Workspace Root**: C:\Users\user\OneDrive\Desktop\001_Project\aws-aidlc-daimonji
+- **Workspace Root**: /home/user/workspace/aws-aidlc-daimonji
 
 ## Code Location Rules
 - **Application Code**: Workspace root (NEVER in aidlc-docs/)
@@ -40,8 +40,8 @@
 - [x] Functional Design
 - [x] NFR Requirements
 - [x] NFR Design
-- [x] Infrastructure Design
-- [x] Code Generation
+- [ ] Infrastructure Design
+- [ ] Code Generation
 - [ ] Build and Test
 
 ### OPERATIONS PHASE
@@ -49,7 +49,7 @@
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Build and Test
+- **Current Stage**: Infrastructure Design
 - **Current Unit**: Infrastructure and Operational Support
-- **Next Stage**: Build and Test review approval or Operations
-- **Status**: Build and Test instructions generated; awaiting user review
+- **Next Stage**: Infrastructure Design review approval or Code Generation restart for Infrastructure and Operational Support
+- **Status**: Restarted Infrastructure Design artifacts regenerated on top of the restarted baseline; awaiting review approval for Infrastructure and Operational Support.

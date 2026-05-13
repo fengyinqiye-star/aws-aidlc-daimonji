@@ -1,76 +1,157 @@
-# Infrastructure and Operational Support 技術スタック判断
+# Infrastructure and Operational Support Tech Stack Decisions
 
-## 判断サマリー
-この Unit は AWS 指向を維持するが、この段階で固定するのはオーケストレーションの中核のみとする。その他の詳細なサービスマッピングは、Infrastructure Design まで柔軟性を残す。
+## 決定サマリー
+この Unit の restarted NFR に基づき、MVP では AWS マネージドサービス中心の単一リージョン構成を採用する。重点は、Step Functions によるタスク分解、Bedrock AgentCore Runtime の組み込み、task 単位監視、機微情報保護、そして TypeScript 向けのテスト実行基盤と Property-Based Testing 基盤の明確化である。
 
-## 1. 現時点で確定した方針
+## 1. オーケストレーション
 
-### オーケストレーション
-- `AWS Step Functions` を主要なオーケストレーション候補とする。
+### `AWS Step Functions`
+- 採用する
 - 理由:
-  - この Unit は状態遷移、再試行、待機、分岐を中心に構成される。
-  - 処理は非同期かつワークフロー駆動である。
-  - MVP では、独自ワークフローランタイムよりも、見える形でのオーケストレーション挙動が重要である。
+  - FR-09 相当の論理ステップを task 単位で管理できる
+  - 分岐、待機、再試行、失敗終端をワークフロー定義として明示できる
+  - デモ時に「どこで止まったか」を説明しやすい
 
-### 実行基盤
-- ワークフロータスクの主要実行候補として `AWS Lambda` を採用する。
+## 2. タスク実行
+
+### `AWS Lambda`
+- 採用する
 - 理由:
-  - MVP の並行度は低〜中程度である。
-  - オーケストレーション周辺処理にはステートレス実行で十分である。
-  - Lambda はイベント駆動処理と小さい運用負荷に適している。
+  - task 単位の処理を分割しやすい
+  - API 入口 Lambda と task Lambda を分離できる
+  - 障害局所化とログ分離に向く
 
-### 状態管理と追跡
-- 追跡ストアの主要候補として `Amazon DynamoDB` を採用する。
+## 3. エージェント実行
+
+### `Amazon Bedrock AgentCore Runtime`
+- 採用する
 - 理由:
-  - Request 状態とイベント履歴は、キー・バリュー/ドキュメント型アクセスと相性がよい。
-  - 低レイテンシな読み書きは、素早い進行状況更新に向いている。
-  - 小規模な並行ワークロードでは、より重いリレーショナル依存はまだ不要である。
+  - Inception で承認済みの Bedrock 中心アーキテクチャに整合する
+  - Negotiation Orchestrator Agent と Lawyer Agent の責務境界を置ける
+  - Step Functions から必要時のみ呼び出す実行モデルと相性がよい
 
-### ログとメトリクス
-- `Amazon CloudWatch Logs` と基本的な `CloudWatch Metrics` を既定の可観測性基盤とする。
+### フォールバック方針
+- Bedrock 障害時に別推論基盤へ自動切替はしない
+- MVP では再試行または人間レビューへのフォールバックを採る
+
+## 4. 状態保存
+
+### `Amazon DynamoDB`
+- 採用する
 - 理由:
-  - MVP に必要なログと基本監視を満たせる。
-  - Lambda および Step Functions との統合が自然である。
+  - request 現在状態、event log、task execution 記録を低運用で保持できる
+  - requestId 基点の読み取りが明確
+  - Lambda / Step Functions と親和性が高い
 
-## 2. 追加の運用判断
+## 5. API 公開
 
-### 障害通知
-- AI が検知可能な高重要度障害の通知機構として、`Slack Webhook` を優先する。
+### `Amazon API Gateway`
+- 採用する
 - 理由:
-  - ユーザーが高重要度障害について Slack 通知を明示的に求めている。
-  - フル機能のアラート基盤を導入せずに、軽量な運用可視性を確保できる。
+  - Frontend Unit へ渡す公開 API 契約を安定化しやすい
+  - API 入口と backend 実行責務を分離できる
+  - Amplify Hosting から接続する前提と整合する
 
-## 3. 後続へ送る判断
+## 6. 可観測性
 
-以下の判断は、意図的に Infrastructure Design へ送る。
+### `Amazon CloudWatch Logs`
+- 採用する
+- 理由:
+  - task 単位ログの標準基盤になる
+  - Lambda、Step Functions、補助処理を一貫して追跡できる
 
-- `API Gateway` をすべてのオーケストレーション入口の前段に置くか、一部のみに限定するか
-- Request 追跡やイベント履歴を別ストアへも複製するか
-- トレーシングに AWS X-Ray を使うか、別手段を使うか
-- 通知先の詳細、再試行通知の閾値、ログ保持設定
-- 一部コンポーネントを Lambda からコンテナ実行基盤へ移すか
+### `Amazon CloudWatch Metrics / Alarms`
+- 採用する
+- 理由:
+  - task 単位の重大障害を検知するために必要
+  - MVP でも障害局所化の説明責任を満たせる
 
-## 4. 制約条件
+### 通知先: `Slack Webhook`
+- 採用する
+- 理由:
+  - AI が要約可能な高重要度障害だけを運用者へ通知するのに十分
+  - デモ運用で即時気付きが得やすい
 
-### 性能制約
-- 状態変化が数秒以内に可視化されることを、このスタックで支えられなければならない。
+## 7. シークレット管理
 
-### 可用性制約
-- このスタックは、単一リージョン前提で、一時障害に対する再試行ベースの回復を満たせばよい。
+### `AWS Secrets Manager`
+- 採用する
+- 理由:
+  - Slack Webhook などの秘密情報をアプリコードや平文変数から分離できる
+  - IAM 制御と合わせて MVP 最低限の安全性を確保できる
 
-### セキュリティ制約
-- MVP では、マネージド暗号化と IAM 制御で十分とする。
+## 8. Frontend 連携契約
 
-### 運用制約
-- `FATAL` 障害は、CloudWatch と Slack 通知フローの両方で観測できなければならない。
+### 固定する項目
+- API Base URL
+- `POST /requests`
+- `GET /requests/{requestId}`
+- 必要 environment variable 名
 
-## 5. この段階では未確定の項目
+### 後続 Unit へ委ねる項目
+- Amplify Hosting の詳細 IaC
+- frontend 側のビルド/デプロイ設定
 
-以下はまだ固定しない。
+## 9. TypeScript テスト基盤
 
-- 詳細なネットワークトポロジ
-- AWS マネージド前提を超えるシークレット保管方式の具体選定
-- サービス間 API 面の分割方針
-- Webhook 中継の具体実装パターン
+### `Vitest`
+- 継続採用とする
+- 役割:
+  - TypeScript 実装の unit / integration test runner
+  - `describe` / `it` / `expect` / mock / project 分離などの実行基盤
+  - CI での test 実行入口
+- 理由:
+  - 現在の backend 実装がすでに `Vitest` を test runner として利用している
+  - 既存の example-based test をそのまま維持できる
+  - `fast-check` と自然に組み合わせられる
 
-これらは、現段階ではなく `Infrastructure Design` で確定する。
+## 10. TypeScript 向け PBT framework
+
+### `fast-check`
+- 正式採用とする
+- 役割:
+  - Property-Based Testing 用の入力生成
+  - shrinking
+  - seed-based reproducibility
+  - `Vitest` 上で実行される PBT assertion library
+- 理由:
+  - TypeScript / JavaScript で成熟している
+  - custom generator、shrinking、seed-based reproducibility を満たす
+  - 既存 test runner と統合しやすい
+
+### 運用方針
+- 既存の example-based test は `Vitest` で維持する
+- Code Generation では `Vitest + fast-check` 併用を前提に test を生成する
+- CI では seed 再現性を担保できる形で実行方針を定義する
+
+## 11. 今回見送るもの
+
+### `AWS X-Ray` / 詳細分散トレーシング
+- 今回は見送る
+- 理由:
+  - MVP では task 単位ログと Alarm を優先する
+  - まずは failure localization を最短で確立する
+
+### マルチリージョン構成
+- 今回は見送る
+- 理由:
+  - 単一リージョン MVP の前提に合わない
+  - デモと初期検証には過剰
+
+### Bedrock 以外の推論基盤追加
+- 今回は見送る
+- 理由:
+  - restart 方針と Inception 承認範囲から外れる
+
+## PBT-09 対応メモ
+- 適用言語: TypeScript
+- test runner: `Vitest`
+- 選定 framework: `fast-check`
+- Code Generation で追加予定 dependency:
+  - `vitest`
+  - `fast-check`
+- 満たすべき要件:
+  - custom generators
+  - shrinking
+  - seed-based reproducibility
+  - test runner integration
