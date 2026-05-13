@@ -39,7 +39,7 @@
 ### CONSTRUCTION PHASE
 - [x] Functional Design
 - [x] NFR Requirements
-- [ ] NFR Design
+- [x] NFR Design
 - [ ] Infrastructure Design
 - [ ] Code Generation
 - [ ] Build and Test
@@ -49,7 +49,7 @@
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: NFR Design
+- **Current Stage**: Infrastructure Design
 - **Current Unit**: Infrastructure and Operational Support
-- **Next Stage**: NFR Design review approval or Infrastructure Design restart for Infrastructure and Operational Support
-- **Status**: Restarted NFR Requirements approved for Infrastructure and Operational Support; NFR Design artifacts are the active review set before continuing the Construction restart.
+- **Next Stage**: Infrastructure Design review approval or Code Generation restart for Infrastructure and Operational Support
+- **Status**: Restarted NFR Design approved for Infrastructure and Operational Support; Infrastructure Design artifacts are being regenerated in Japanese on top of the restarted baseline.
