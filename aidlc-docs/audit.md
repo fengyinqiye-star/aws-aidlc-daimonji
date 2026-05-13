@@ -1879,3 +1879,18 @@ Inceptionを完了させてください。READMEもInception完了に併せ更�
 
 ---
 
+## Infrastructure Design Regeneration Resume
+**Timestamp**: 2026-05-13T19:53:15+09:00
+**User Input**: "ではInfrastructure Designに進めましょうか。"
+**AI Response**: "Resumed the restarted Infrastructure Design stage for `Infrastructure and Operational Support`, regenerated the infrastructure design artifacts in Japanese on top of the restarted functional and NFR baseline, and aligned `aidlc-state.md` so the review gate now consistently points to Infrastructure Design."
+**Context**: CONSTRUCTION - restarted Infrastructure Design regeneration and review preparation
+
+---
+
+## Infrastructure Design Japanese Regeneration
+**Timestamp**: 2026-05-13T20:03:00+09:00
+**User Input**: "生成したドキュメントを日本語で再生成してください。"
+**AI Response**: "Regenerated the restarted Infrastructure Design documents in Japanese while preserving the same restarted baseline, service mapping, request flow, failure handling, and frontend contract boundaries."
+**Context**: CONSTRUCTION - Infrastructure Design document language regeneration
+
+---

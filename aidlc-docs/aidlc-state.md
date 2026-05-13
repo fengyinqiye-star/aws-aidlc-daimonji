@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-04T21:37:02+09:00
-- **Current Stage**: CONSTRUCTION - NFR Requirements (Infrastructure and Operational Support / Review)
+- **Current Stage**: CONSTRUCTION - Infrastructure Design (Infrastructure and Operational Support / Review)
 
 ## Execution Plan Summary
 - **Total Stages**: 10
@@ -52,4 +52,4 @@
 - **Current Stage**: Infrastructure Design
 - **Current Unit**: Infrastructure and Operational Support
 - **Next Stage**: Infrastructure Design review approval or Code Generation restart for Infrastructure and Operational Support
-- **Status**: Restarted NFR Design approved for Infrastructure and Operational Support; Infrastructure Design artifacts are being regenerated in Japanese on top of the restarted baseline.
+- **Status**: Restarted Infrastructure Design artifacts regenerated on top of the restarted baseline; awaiting review approval for Infrastructure and Operational Support.

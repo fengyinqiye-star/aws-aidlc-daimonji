@@ -1,204 +1,130 @@
-# Infrastructure and Operational Support インフラ設計
+# Infrastructure and Operational Support Infrastructure Design
 
 ## 概要
-本書は、restart 後の `Infrastructure and Operational Support` Unit に対するインフラ設計を定義する。基準は restarted Functional Design、restarted NFR Requirements、restarted NFR Design であり、再実行前の coarse-grained な実装ではなく、Step Functions の task 分解、Bedrock AgentCore Runtime、request tracking、task 単位 observability、frontend 向け公開契約を前提にしている。
+本書は、restart 後の `Infrastructure and Operational Support` Unit について、restarted Functional Design と restarted NFR Design を具体的な AWS インフラへ対応付けたものである。対象は公開 API 入口、workflow orchestration、task 実行、Bedrock agent runtime 連携、request tracking、通知、observability である。Amplify Hosting 自体は後続の frontend unit に委ねるが、この Unit では frontend が依存する公開 API 契約を固定する。
 
-## 1. 採用するクラウド / 配置前提
+## インフラ設計方針
 
-### クラウド方針
-- AWS を採用する
-- MVP は単一リージョン構成とする
+### MVP 方針
+- 配置先は単一 AWS リージョンとする。
+- custom platform より managed AWS services を優先する。
+- Step Functions を workflow control plane の中核に据える。
+- 実行粒度は task 単位の Lambda handler を維持し、2 本の coarse Lambda 構成へ戻さない。
+- Bedrock AgentCore Runtime は明示的な integration boundary とし、失敗は `AgentRuntimeFailure` として独立分類する。
+- `Request State`、`Request Event Log`、`Task Execution Record` は分離し、UI 向け current state と監査履歴を混同しない。
 
-### 環境方針
-- 現段階の MVP では単一環境を前提とする
-- 将来の `dev` / `stg` / `prod` 分離に備えて、命名規則と設定分離が可能な構成を維持する
+### 採用サービス
+- `Amazon API Gateway`
+- `AWS Lambda`
+- `AWS Step Functions`
+- `Amazon DynamoDB`
+- `AWS Secrets Manager`
+- `Amazon CloudWatch`
+- `Amazon Bedrock AgentCore Runtime`
+- `Slack Webhook`
 
-## 2. 公開入口のインフラ対応
+## サービス対応
 
-### Public Request Entry
-- `Amazon API Gateway` を公開 API 入口として採用する
+### 公開 API 境界
+- `Amazon API Gateway` をこの Unit の唯一の公開入口とする。
+- 公開 contract は `POST /requests` と `GET /requests/{requestId}` に限定する。
+- internal workflow step は外部 API として露出させない。
 
-### 役割
-- frontend など外部クライアントからの HTTP リクエストを受け付ける
-- `POST /requests`
-- `GET /requests/{requestId}`
+### Workflow Starter Lambda
+- API Gateway 配下に専用の starter Lambda を置く。
+- 責務は request 正規化、初期 status 決定、初期 event 記録、Step Functions 起動に限定する。
+- Bedrock 呼び出しや downstream task logic は持たせない。
 
-### 設計意図
-- 公開 API 境界を一箇所に固定する
-- 内部 workflow / task 間通信は API Gateway に戻さない
-- frontend 向け公開契約を安定化させる
+### Step Functions workflow coordinator
+- `AWS Step Functions` が orchestration、retry routing、failure routing、terminal transition を担う。
+- restarted baseline の要求に従い、task-level orchestration を前提とする。
 
-## 3. workflow 開始と orchestration のインフラ対応
+### Task Lambda group
+- workflow step は task-oriented な Lambda 群へ対応付ける。
+- 想定する logical task は以下である。
+  - `ExtractVacationIntent`
+  - `CheckMissingInformation`
+  - `LoadGoogleCalendar`
+  - `LoadTeamSchedule`
+  - `CalculateVacationScore`
+  - `GenerateNegotiationPlan`
+  - `GenerateSlackMessage`
+  - `PostToSlack`
+  - `RegisterCalendarLeave`
+  - `UpdateStatus`
+  - `ErrorHandler`
+- Code Generation では physical handler の統合や分割はあり得るが、infra boundary としては task 単位の failure localization を維持する。
 
-### Workflow Starter
-- `AWS Lambda` を採用する
+### Bedrock runtime boundary
+- `Amazon Bedrock AgentCore Runtime` を専用 runtime dependency として扱う。
+- orchestrator agent と lawyer agent の実行は task Lambda からこの boundary を通じて呼び出す。
+- Bedrock failure は generic adapter failure に吸収せず独立して扱う。
 
-### Workflow State Coordinator
-- `AWS Step Functions` を採用する
+### Request tracking storage
+- 永続化には `Amazon DynamoDB` を採用する。
+- 論理的な store は以下の 3 つを維持する。
+  - `Request State`
+  - `Request Event Log`
+  - `Task Execution Record`
+- `GET /requests/{requestId}` は `Request State` を primary read model とし、必要時のみ event history を補助参照する。
 
-### 役割分担
-- `API Gateway -> Workflow Starter Lambda -> Step Functions` を基本入口とする
-- Workflow Starter は request 受理、初期 state 作成、初回 event 記録、state machine 起動だけを担う
-- Step Functions は task 単位での分岐、待機、再試行、終端遷移を担う
+### Secret management
+- Slack webhook などの integration secret は `AWS Secrets Manager` に格納する。
+- IAM は必要な task のみに secret access を許可する。
+- secret value は logs や event history に出力しない。
 
-### restart 方針との対応
-- Pass state 1 個だけの粗い flow には戻さない
-- FR-09 相当の task 分解を infrastructure 前提として保持する
+### Notifications
+- `Slack Webhook` は高重要度の運用通知に限定する。
+- routine workflow progress は CloudWatch に留め、Slack へは流さない。
+- 1 workflow あたりの alert は集約し、通知スパムを防ぐ。
 
-## 4. task 実行のインフラ対応
-
-### Task Execution Layer
-- `AWS Lambda` を task 単位の実行基盤として採用する
-
-### 設計方針
-- API 入口 Lambda と task Lambda を分離する
-- task ごとの責務を粗く潰さず、workflow step 単位の failure localization を維持する
-- Bedrock 呼び出しを含む task は一般 task と区別できるようにする
-
-### 想定する task 群
-- request intent extraction
-- missing information check
-- calendar / team data loading
-- score / planning support
-- review / notification support
-- final registration / failure transition
-
-## 5. Bedrock AgentCore Runtime のインフラ対応
-
-### Bedrock Agent Runtime Gateway
-- `Amazon Bedrock AgentCore Runtime` を採用する
-
-### 役割
-- orchestrator agent / lawyer agent の実行境界を提供する
-- Bedrock 呼び出し遅延と障害を一般 task と分離観測する
-
-### 設計意図
-- restart 理由のひとつである Bedrock 未反映を解消する
-- `AgentRuntimeFailure` を明示的に扱える構成にする
-
-### 補足
-- Bedrock 以外の推論基盤追加や自動切替は MVP では扱わない
-
-## 6. request tracking のインフラ対応
-
-### Request State Store
-- `Amazon DynamoDB` を採用する
-
-### Request Event Log
-- `Amazon DynamoDB` を採用する
-
-### Task Execution Record
-- 同じく `Amazon DynamoDB` 上で保持してよいが、論理的には current state / event log / task execution record を分離して扱う
-
-### 設計意図
-- current state は高速 read の主経路にする
-- event log は監査 / 説明責任 / troubleshooting の主経路にする
-- task 実行記録は request / workflow / task / retry / failure の相関を保持する
-
-## 7. secret 管理のインフラ対応
-
-### Secret Access Boundary
-- `AWS Secrets Manager` を採用する
-
-### 対象
-- Slack Webhook
-- 将来追加される外部通知用 secret
-
-### 設計意図
-- secret をコードや平文環境変数へ直接埋め込まない
-- task 実装から secret の解決責務を分離する
-
-## 8. 可観測性 / 通知のインフラ対応
-
-### 構造化ログ
-- `Amazon CloudWatch Logs` を採用する
-
-### メトリクス
-- `Amazon CloudWatch Metrics` を採用する
-
-### アラーム
-- `Amazon CloudWatch Alarms` を採用する
-
-### 高重要度通知
-- `Slack Webhook` を採用する
-
-### task 単位 observability
-- 少なくとも以下の相関キーをログ / メトリクスへ反映できる構成とする
+### Observability
+- `Amazon CloudWatch` を logs、metrics、alarms の基盤とする。
+- task 単位で以下の追跡 key を保持する。
   - `requestId`
   - `workflowExecutionId`
   - `taskName`
   - `failureCategory`
   - `retryAttempt`
+- 主な alarm 候補は task failure count、retry exhaustion、Bedrock runtime failure、terminal workflow failure とする。
 
-### 設計意図
-- workflow 全体より先に task 単位の失敗局所化を説明できるようにする
-- 高重要度障害だけを外部通知し、すべての実行イベントを Slack に送らない
+### Frontend-facing contract
+- この Unit で固定するのは以下である。
+  - API base URL
+  - `POST /requests`
+  - `GET /requests/{requestId}`
+  - frontend runtime access 用 environment variable 名
+- Amplify Hosting IaC や frontend deploy 詳細は downstream frontend unit の責務とする。
 
-## 9. frontend 連携前提のインフラ境界
+## リソース責務
 
-### この unit で固定するもの
-- API Base URL
-- `POST /requests`
-- `GET /requests/{requestId}`
-- frontend が参照する environment variable 名
+### この Unit が持つもの
+- API Gateway
+- Workflow Starter Lambda
+- Step Functions state machine
+- request tracking 用 DynamoDB resources
+- task Lambda group
+- CloudWatch log groups、metrics、alarms
 
-### 後続 Unit に委ねるもの
-- Amplify Hosting の詳細 IaC
-- frontend の build / deploy 定義
+### 後続 Unit へ委譲するもの
+- Amplify Hosting deploy design
+- frontend build / hosting pipeline
+- advanced authentication and authorization design
+- multi-region deployment
+- advanced VPC / private networking design
 
-### 設計意図
-- Frontend Unit が実装される前に、接続前提を失わないようにする
+## この段階で採用しないもの
+- マルチリージョン配置
+- VPC 前提の閉域ネットワーク
+- X-Ray などの追加 distributed tracing
+- frontend hosting の詳細 IaC
 
-## 10. ネットワーク方針
-
-### 基本方針
-- MVP では API Gateway を公開入口とする
-- AWS managed service 中心で構成し、複雑な VPC 要件は現時点では導入しない
-
-### 内部通信
-- `API Gateway -> Lambda`
-- `Lambda -> Step Functions`
-- `Step Functions -> Lambda`
-- `Lambda -> DynamoDB`
-- `Lambda -> Secrets Manager`
-- `Lambda -> Bedrock AgentCore Runtime`
-- `Lambda -> Slack Webhook`
-
-## 11. リソース分離方針
-
-### Unit 単位分離
-- 本 unit の主要リソースは unit 単位で管理する
-- 例:
-  - workflow starter
-  - state machine
-  - request state store
-  - event log store
-  - task execution record store
-  - secret reference
-  - alarm / log group
-
-### 共有インフラ
-- 現時点では shared-infrastructure を新設しない
-- 将来複数 Unit で共有する通知基盤や API 基盤が明確になった時点で再評価する
-
-## 12. 現段階で見送るもの
-
-### 見送る対象
-- マルチリージョン冗長化
-- X-Ray など詳細分散トレーシング
-- Amplify Hosting の詳細リソース設計
-- Bedrock 以外の推論基盤
-
-### 理由
-- restarted NFR の MVP 範囲を超える
-- まずは task 単位 observability と failure localization を最短で成立させることを優先する
-
-## 拡張ルール適用状況
+## Extension Compliance Summary
 
 ### Security Baseline
-- 状態: N/A
-- 理由: `aidlc-state.md` で無効化されている
+- Status: N/A
+- Reason: `aidlc-state.md` で disabled になっているため。
 
 ### Property-Based Testing
-- 状態: N/A
-- 理由: この段階はインフラ mapping であり、PBT の具体適用は後続の Code Generation / testing で扱う
+- Status: N/A
+- Reason: 本書は infrastructure mapping を対象とし、PBT の具体適用は Code Generation と test design の責務であるため。
